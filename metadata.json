@@ -1,0 +1,6 @@
+{
+  "name": "GameVault",
+  "description": "A responsive directory dashboard for organizing and categorizing links to unblocked game sites.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
