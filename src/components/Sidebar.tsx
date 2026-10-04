@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Layers,
   Star,
@@ -9,6 +9,9 @@ import {
   Medal,
   Home,
   X,
+  AlertTriangle,
+  Lightbulb,
+  ChevronDown,
 } from 'lucide-react';
 import { Category, GameSiteLink, ViewMode } from '../types';
 import { CategoryIcon } from './CategoryIcon';
@@ -50,6 +53,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const query = searchQuery.trim().toLowerCase();
 
+  // Dropdown states: Directory Index open by default, others collapsed
+  const [isFormsOpen, setIsFormsOpen] = useState(false);
+  const [isDirectoryOpen, setIsDirectoryOpen] = useState(true);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+
   // Search matches across categories
   const matchingCategories = categories.filter((cat) => {
     if (!query) return true;
@@ -88,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-14 bottom-0 left-0 z-45 w-72 flex-col border-r border-neutral-800 bg-neutral-950 p-4 transition-transform duration-200 lg:static lg:flex lg:translate-x-0 ${
+        className={`fixed top-14 bottom-0 left-0 z-40 w-72 flex-col border-r border-neutral-800 bg-neutral-950 p-4 transition-transform duration-200 lg:static lg:flex lg:h-full lg:shrink-0 lg:overflow-y-auto lg:translate-x-0 ${
           isOpenOnMobile ? 'flex translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -111,145 +119,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <X className="h-3.5 w-3.5" />
             </button>
           )}
-        </div>
-
-        {/* Primary Views Section */}
-        <div className="mb-4 space-y-1">
-          <div className="px-2 pb-1.5 text-xs font-medium tracking-wide text-neutral-400">
-            Directory Index
-          </div>
-
-          {/* 0. Home / Headquarters */}
-          <button
-            type="button"
-            onClick={() => {
-              onNavigate('home');
-              onCloseMobile();
-            }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-xs font-medium transition-colors ${
-              currentView === 'home'
-                ? 'bg-neutral-800 text-neutral-100 font-semibold shadow-sm'
-                : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Home className="h-4 w-4 text-emerald-400" />
-              <span>Home</span>
-            </div>
-            <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-emerald-500/20 font-bold">
-              HQ
-            </span>
-          </button>
-
-          {/* 1. All Sites */}
-          <button
-            type="button"
-            onClick={() => {
-              onNavigate('all-sites');
-              onCloseMobile();
-            }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-xs font-medium transition-colors ${
-              currentView === 'all-sites'
-                ? 'bg-neutral-800 text-neutral-100'
-                : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Globe className="h-4 w-4 text-neutral-400" />
-              <span>All Sites</span>
-            </div>
-            <span className="font-mono text-xs tabular-nums text-neutral-400">
-              {query ? matchingSites.length : totalSites}
-            </span>
-          </button>
-
-          {/* 2. Best Games (Leaderboard) - Placed right under All Sites */}
-          <button
-            type="button"
-            onClick={() => {
-              onNavigate('best-games');
-              onCloseMobile();
-            }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-xs font-medium transition-colors ${
-              currentView === 'best-games'
-                ? 'bg-neutral-800 text-neutral-100'
-                : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Trophy className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-              <span className="text-neutral-100 font-medium">Best Games</span>
-            </div>
-            <span className="font-mono text-xs tabular-nums text-yellow-400 font-semibold">
-              {bestGamesCount}
-            </span>
-          </button>
-
-          {/* 3. Best Websites - Placed directly under Best Games, ONLY in the 3-line menu */}
-          <button
-            type="button"
-            onClick={() => {
-              onNavigate('best-websites');
-              onCloseMobile();
-            }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-xs font-medium transition-colors ${
-              currentView === 'best-websites'
-                ? 'bg-neutral-800 text-neutral-100'
-                : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Medal className="h-4 w-4 text-amber-400 fill-amber-400" />
-              <span className="text-neutral-100 font-medium">Best Websites</span>
-            </div>
-            <span className="font-mono text-xs tabular-nums text-amber-400 font-semibold">
-              {bestWebsitesCount}
-            </span>
-          </button>
-
-          {/* 3. All Categories */}
-          <button
-            type="button"
-            onClick={() => {
-              onNavigate('categories');
-              onCloseMobile();
-            }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-xs font-medium transition-colors ${
-              currentView === 'categories' && !selectedCategoryId
-                ? 'bg-neutral-800 text-neutral-100'
-                : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Layers className="h-4 w-4 text-neutral-400" />
-              <span>All Categories</span>
-            </div>
-            <span className="font-mono text-xs tabular-nums text-neutral-400">
-              {categories.length}
-            </span>
-          </button>
-
-          {/* 4. Starred Sites */}
-          <button
-            type="button"
-            onClick={() => {
-              onNavigate('favorites');
-              onCloseMobile();
-            }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-xs font-medium transition-colors ${
-              currentView === 'favorites'
-                ? 'bg-neutral-800 text-neutral-100'
-                : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Star className="h-4 w-4 text-neutral-400" />
-              <span>Starred Sites</span>
-            </div>
-            <span className="font-mono text-xs tabular-nums text-neutral-400">
-              {favoriteSitesCount}
-            </span>
-          </button>
         </div>
 
         {/* If searching: Show Matching Individual Sites List */}
@@ -350,54 +219,286 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
         ) : (
-          /* Normal Categories List */
-          <>
-            <div className="mb-2 flex items-center justify-between px-2 pt-2 border-t border-neutral-800/80">
-              <span className="text-xs font-medium tracking-wide text-neutral-400">
-                Site Categories ({categories.length})
-              </span>
-            </div>
+          /* Normal State: Sections formatted as Collapsible Dropdown Boxes */
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 -mr-1">
+            {/* 1. Forms & Feedback Dropdown Box */}
+            <div className="rounded-lg border border-neutral-800/80 bg-neutral-900/40 overflow-hidden transition-colors hover:border-neutral-700/80">
+              <button
+                type="button"
+                onClick={() => setIsFormsOpen(!isFormsOpen)}
+                className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-800/50 transition-colors cursor-pointer select-none"
+                aria-expanded={isFormsOpen}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="tracking-wide">Forms & Feedback</span>
+                  <span className="rounded bg-neutral-800 px-1.5 py-0.2 text-[10px] font-mono text-neutral-400 border border-neutral-700/50">
+                    2
+                  </span>
+                </div>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 ${
+                    isFormsOpen ? 'rotate-180 text-emerald-400' : ''
+                  }`}
+                />
+              </button>
 
-            <div className="flex-1 overflow-y-auto space-y-0.5 pr-1 -mr-1">
-              {categories.length > 0 ? (
-                categories.map((category) => {
-                  const isSelected =
-                    currentView === 'category-detail' && selectedCategoryId === category.id;
-                  const count = siteCountByCategory[category.id] || 0;
-
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      onClick={() => {
-                        onSelectCategory(category.id);
-                        onCloseMobile();
-                      }}
-                      className={`group flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                        isSelected
-                          ? 'bg-neutral-800 text-neutral-100'
-                          : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 truncate">
-                        <span className="shrink-0 text-neutral-400 group-hover:text-neutral-300">
-                          <CategoryIcon name={category.icon} className="h-3.5 w-3.5" />
-                        </span>
-                        <span className="truncate">{category.name}</span>
-                      </div>
-                      <span className="shrink-0 font-mono text-[11px] tabular-nums text-neutral-400">
-                        {count}
+              {isFormsOpen && (
+                <div className="p-1.5 pt-0.5 space-y-0.5 border-t border-neutral-800/60 animate-fade-in">
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSel_qnMs80ZZIFoIgV-VqPEvOd6ZDZjtbr-32cb9KHXrVuCqw/viewform?usp=dialog"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800/80 hover:text-white transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <span className="text-amber-400/90 group-hover:text-amber-400">
+                        <AlertTriangle className="h-3.5 w-3.5" />
                       </span>
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="px-2 py-4 text-xs text-neutral-500">
-                  No categories configured
+                      <span className="truncate">GameVault error report</span>
+                    </div>
+                    <ExternalLink className="h-3 w-3 shrink-0 text-neutral-500 group-hover:text-neutral-300" />
+                  </a>
+
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSdhulN_Qrg7223ug-iI4J3KmN5nJSepxTMDyFNSov4IE4xH8A/viewform?usp=dialog"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800/80 hover:text-white transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <span className="text-emerald-400/90 group-hover:text-emerald-400">
+                        <Lightbulb className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="truncate">GameVault Games suggestion</span>
+                    </div>
+                    <ExternalLink className="h-3 w-3 shrink-0 text-neutral-500 group-hover:text-neutral-300" />
+                  </a>
                 </div>
               )}
             </div>
-          </>
+
+            {/* 2. Directory Index Dropdown Box (Open by Default) */}
+            <div className="rounded-lg border border-neutral-800/80 bg-neutral-900/40 overflow-hidden transition-colors hover:border-neutral-700/80">
+              <button
+                type="button"
+                onClick={() => setIsDirectoryOpen(!isDirectoryOpen)}
+                className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-800/50 transition-colors cursor-pointer select-none"
+                aria-expanded={isDirectoryOpen}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="tracking-wide">Directory Index</span>
+                  <span className="rounded bg-neutral-800 px-1.5 py-0.2 text-[10px] font-mono text-neutral-400 border border-neutral-700/50">
+                    6
+                  </span>
+                </div>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 ${
+                    isDirectoryOpen ? 'rotate-180 text-emerald-400' : ''
+                  }`}
+                />
+              </button>
+
+              {isDirectoryOpen && (
+                <div className="p-1.5 pt-0.5 space-y-0.5 border-t border-neutral-800/60 animate-fade-in">
+                  {/* 0. Home / Headquarters */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate('home');
+                      onCloseMobile();
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      currentView === 'home'
+                        ? 'bg-neutral-800 text-neutral-100 font-semibold shadow-sm'
+                        : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Home className="h-4 w-4 text-emerald-400" />
+                      <span>Home</span>
+                    </div>
+                    <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-emerald-500/20 font-bold">
+                      HQ
+                    </span>
+                  </button>
+
+                  {/* 1. All Sites */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate('all-sites');
+                      onCloseMobile();
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      currentView === 'all-sites'
+                        ? 'bg-neutral-800 text-neutral-100'
+                        : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Globe className="h-4 w-4 text-neutral-400" />
+                      <span>All Sites</span>
+                    </div>
+                    <span className="font-mono text-xs tabular-nums text-neutral-400">
+                      {totalSites}
+                    </span>
+                  </button>
+
+                  {/* 2. Best Games */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate('best-games');
+                      onCloseMobile();
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      currentView === 'best-games'
+                        ? 'bg-neutral-800 text-neutral-100'
+                        : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Trophy className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                      <span className="text-neutral-100 font-medium">Best Games</span>
+                    </div>
+                    <span className="font-mono text-xs tabular-nums text-yellow-400 font-semibold">
+                      {bestGamesCount}
+                    </span>
+                  </button>
+
+                  {/* 3. Best Websites */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate('best-websites');
+                      onCloseMobile();
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      currentView === 'best-websites'
+                        ? 'bg-neutral-800 text-neutral-100'
+                        : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Medal className="h-4 w-4 text-amber-400 fill-amber-400" />
+                      <span className="text-neutral-100 font-medium">Best Websites</span>
+                    </div>
+                    <span className="font-mono text-xs tabular-nums text-amber-400 font-semibold">
+                      {bestWebsitesCount}
+                    </span>
+                  </button>
+
+                  {/* 4. All Categories */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate('categories');
+                      onCloseMobile();
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      currentView === 'categories' && !selectedCategoryId
+                        ? 'bg-neutral-800 text-neutral-100'
+                        : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Layers className="h-4 w-4 text-neutral-400" />
+                      <span>All Categories</span>
+                    </div>
+                    <span className="font-mono text-xs tabular-nums text-neutral-400">
+                      {categories.length}
+                    </span>
+                  </button>
+
+                  {/* 5. Starred Sites */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate('favorites');
+                      onCloseMobile();
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      currentView === 'favorites'
+                        ? 'bg-neutral-800 text-neutral-100'
+                        : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Star className="h-4 w-4 text-neutral-400" />
+                      <span>Starred Sites</span>
+                    </div>
+                    <span className="font-mono text-xs tabular-nums text-neutral-400">
+                      {favoriteSitesCount}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Site Categories Dropdown Box */}
+            <div className="rounded-lg border border-neutral-800/80 bg-neutral-900/40 overflow-hidden transition-colors hover:border-neutral-700/80">
+              <button
+                type="button"
+                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-800/50 transition-colors cursor-pointer select-none"
+                aria-expanded={isCategoriesOpen}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="tracking-wide">Site Categories</span>
+                  <span className="rounded bg-neutral-800 px-1.5 py-0.2 text-[10px] font-mono text-neutral-400 border border-neutral-700/50">
+                    {categories.length}
+                  </span>
+                </div>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 ${
+                    isCategoriesOpen ? 'rotate-180 text-emerald-400' : ''
+                  }`}
+                />
+              </button>
+
+              {isCategoriesOpen && (
+                <div className="p-1.5 pt-0.5 space-y-0.5 border-t border-neutral-800/60 animate-fade-in max-h-64 overflow-y-auto">
+                  {categories.length > 0 ? (
+                    categories.map((category) => {
+                      const isSelected =
+                        currentView === 'category-detail' && selectedCategoryId === category.id;
+                      const count = siteCountByCategory[category.id] || 0;
+
+                      return (
+                        <button
+                          key={category.id}
+                          type="button"
+                          onClick={() => {
+                            onSelectCategory(category.id);
+                            onCloseMobile();
+                          }}
+                          className={`group flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                            isSelected
+                              ? 'bg-neutral-800 text-neutral-100'
+                              : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 truncate">
+                            <span className="shrink-0 text-neutral-400 group-hover:text-neutral-300">
+                              <CategoryIcon name={category.icon} className="h-3.5 w-3.5" />
+                            </span>
+                            <span className="truncate">{category.name}</span>
+                          </div>
+                          <span className="shrink-0 font-mono text-[11px] tabular-nums text-neutral-400">
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="px-2 py-3 text-xs text-neutral-500">
+                      No categories configured
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </aside>
     </>

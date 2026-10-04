@@ -145,26 +145,30 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
   const isLockedOut = lockoutRemaining > 0;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-neutral-950 px-4 py-8 relative overflow-hidden select-none">
-      {/* Background radial ambient glows */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#0a0a0a] px-4 py-8 relative overflow-hidden select-none">
+      {/* Background warm orange & dark ambient glows */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-red-950/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div
-        className={`w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl relative z-10 transition-transform ${
+        className={`w-full max-w-md rounded-2xl border border-neutral-800 bg-[#121316]/95 backdrop-blur-xl p-6 sm:p-8 shadow-2xl relative z-10 transition-transform ${
           isShaking ? 'animate-shake' : ''
         }`}
       >
         {/* Header Icon */}
         <div className="flex flex-col items-center text-center space-y-3">
           <div
-            className={`flex h-16 w-16 items-center justify-center rounded-2xl border shadow-inner transition-colors ${
+            className={`flex h-16 w-16 items-center justify-center rounded-2xl border transition-colors ${
               isLockedOut
                 ? 'bg-red-950/80 border-red-700/80 text-red-400'
-                : 'bg-neutral-800/80 border-neutral-700/80 text-amber-400'
+                : 'bg-[#181a1d] border-neutral-800 text-amber-400'
             }`}
           >
-            {isLockedOut ? <Clock className="h-8 w-8 animate-pulse" /> : <Lock className="h-8 w-8" />}
+            {isLockedOut ? (
+              <Clock className="h-7 w-7 animate-pulse" />
+            ) : (
+              <Lock className="h-7 w-7 text-amber-400" />
+            )}
           </div>
 
           <div className="space-y-1">
@@ -172,7 +176,7 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-[11px] font-mono font-medium ${
                 isLockedOut
                   ? 'border-red-800/80 bg-red-950/60 text-red-300'
-                  : 'border-neutral-700 bg-neutral-800/60 text-neutral-300'
+                  : 'border-neutral-800 bg-[#16181b] text-neutral-300'
               }`}
             >
               {isLockedOut ? (
@@ -183,7 +187,6 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
               <span>{isLockedOut ? 'SECURITY LOCKOUT' : 'RESTRICTED ACCESS'}</span>
             </div>
 
-            {/* ONLY FOR LOCK SCREEN: Restricted Vault */}
             <h1 className="text-2xl font-extrabold text-white tracking-tight sm:text-3xl font-mono">
               Restricted Vault
             </h1>
@@ -232,8 +235,8 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
                   isLockedOut
                     ? 'border-red-900 bg-red-950/30 text-red-300 cursor-not-allowed'
                     : error
-                    ? 'border-red-500 bg-black/60 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-neutral-700 bg-black/60 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                    ? 'border-red-500 bg-[#0d0e11] focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                    : 'border-neutral-800 bg-[#0d0e11] focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
                 }`}
               />
             </div>
@@ -251,13 +254,14 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
             )}
           </div>
 
+          {/* Vibrant Orange Unlock Button matching Photo 1 */}
           <button
             type="submit"
             disabled={isLockedOut}
             className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold shadow-lg transition-all ${
               isLockedOut
                 ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed shadow-none'
-                : 'bg-amber-500 text-neutral-950 shadow-amber-500/20 hover:bg-amber-400 active:scale-[0.98]'
+                : 'bg-[#ff9800] hover:bg-[#fb8c00] text-neutral-950 shadow-orange-500/20 active:scale-[0.98]'
             }`}
           >
             {isLockedOut ? (

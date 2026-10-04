@@ -14,16 +14,40 @@ import { CategoryDetail } from './components/CategoryDetail';
 import { SitesDirectory } from './components/SitesDirectory';
 import { HomePage } from './components/HomePage';
 import { PasscodeGate } from './components/PasscodeGate';
+import { WhatsNewModal, WHATS_NEW_STORAGE_KEY } from './components/WhatsNewModal';
+import { DiceIcon } from './components/DiceIcon';
 
 const STORAGE_KEYS = {
-  CATEGORIES: 'gamevault_categories_v10',
-  SITES: 'gamevault_sites_v10',
+  CATEGORIES: 'gamevault_categories_v12',
+  SITES: 'gamevault_sites_v12',
+  STARRED: 'gamevault_starred_sites_v12',
 };
 
 export default function App() {
   // Passcode gate state: strictly ephemeral (resets on refresh)
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockToast, setShowUnlockToast] = useState(false);
+  const [showWhatsNewModal, setShowWhatsNewModal] = useState(false);
+  const [randomGameToast, setRandomGameToast] = useState<{
+    name: string;
+    url: string;
+    rank?: number;
+  } | null>(null);
+
+  // User starred site IDs: remembered on this device in persistent localStorage
+  // By default, NO sites are starred (empty array)
+  const [starredSiteIds, setStarredSiteIds] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.STARRED);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  });
 
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
@@ -38,7 +62,7 @@ export default function App() {
     }
   });
 
-  const [sites, setSites] = useState<GameSiteLink[]>(() => {
+  const [rawSites, setRawSites] = useState<GameSiteLink[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.SITES);
       if (stored) {
@@ -50,6 +74,15 @@ export default function App() {
       return INITIAL_SITE_LINKS;
     }
   });
+
+  // Dynamic sites array reflecting starred status from device storage
+  const sites = useMemo(() => {
+    const starredSet = new Set(starredSiteIds);
+    return rawSites.map((site) => ({
+      ...site,
+      isFavorite: starredSet.has(site.id),
+    }));
+  }, [rawSites, starredSiteIds]);
 
   // Navigation & View States - Default to Home page
   const [currentView, setCurrentView] = useState<ViewMode>('home');
@@ -68,11 +101,11 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEYS.SITES, JSON.stringify(sites));
+      localStorage.setItem(STORAGE_KEYS.SITES, JSON.stringify(rawSites));
     } catch {
       // storage unavailable
     }
-  }, [sites]);
+  }, [rawSites]);
 
   // Derived counts
   const siteCountByCategory = useMemo(() => {
@@ -125,13 +158,28 @@ export default function App() {
   };
 
   const handleToggleFavoriteSite = (siteId: string) => {
-    setSites((prev) =>
-      prev.map((s) => (s.id === siteId ? { ...s, isFavorite: !s.isFavorite } : s))
-    );
+    setStarredSiteIds((prev) => {
+      const next = prev.includes(siteId) ? prev.filter((id) => id !== siteId) : [...prev, siteId];
+      try {
+        localStorage.setItem(STORAGE_KEYS.STARRED, JSON.stringify(next));
+      } catch {
+        // storage unavailable
+      }
+      return next;
+    });
   };
 
   const handleDeleteSite = (siteId: string) => {
-    setSites((prev) => prev.filter((s) => s.id !== siteId));
+    setRawSites((prev) => prev.filter((s) => s.id !== siteId));
+    setStarredSiteIds((prev) => {
+      const next = prev.filter((id) => id !== siteId);
+      try {
+        localStorage.setItem(STORAGE_KEYS.STARRED, JSON.stringify(next));
+      } catch {
+        // storage unavailable
+      }
+      return next;
+    });
   };
 
   const handleUnlock = () => {
@@ -140,11 +188,94 @@ export default function App() {
     setTimeout(() => {
       setShowUnlockToast(false);
     }, 1800);
+
+    // Passcode Unlock Trigger:
+    // As soon as the user enters the authorized passcode to unlock the vault,
+    // the modal automatically displays on the screen unless already dismissed
+    // in persistent localStorage (gamevault_seen_v1_1_modal).
+    try {
+      const hasSeen = localStorage.getItem(WHATS_NEW_STORAGE_KEY);
+      if (!hasSeen) {
+        setShowWhatsNewModal(true);
+      }
+    } catch {
+      setShowWhatsNewModal(true);
+    }
   };
 
   const handleLock = () => {
     setIsUnlocked(false);
     setShowUnlockToast(false);
+    setShowWhatsNewModal(false);
+    setRandomGameToast(null);
+  };
+
+  const handleOpenWhatsNew = () => {
+    setShowWhatsNewModal(true);
+  };
+
+  // Auto-dismiss random game toast after 4.5s
+  useEffect(() => {
+    if (!randomGameToast) return;
+    const timer = setTimeout(() => {
+      setRandomGameToast(null);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [randomGameToast]);
+
+  // 🎲 Random Game / I'm Feeling Lucky Launch Handler
+  const handleLaunchRandomGame = () => {
+    const isActuallyBlocked = (notice?: string) => {
+      if (!notice) return false;
+      const lower = notice.toLowerCase();
+      return (
+        lower.includes('blocked') ||
+        lower.includes('shutdown') ||
+        lower.includes('offline') ||
+        lower.includes('taken down')
+      );
+    };
+
+    // Candidate Pool 1: Verified top-rated Best Games list
+    const workingBestGames = sites.filter(
+      (s) => s.isBestGame && !isActuallyBlocked(s.specialNotice)
+    );
+
+    // Candidate Pool 2: Working direct games or playable instances
+    const workingPlayableGames = sites.filter(
+      (s) =>
+        (s.isBestGame ||
+          s.categoryId === 'direct-links' ||
+          s.tags.some((t) => t.toLowerCase().includes('game'))) &&
+        !isActuallyBlocked(s.specialNotice)
+    );
+
+    const pool =
+      workingBestGames.length > 0
+        ? workingBestGames
+        : workingPlayableGames.length > 0
+        ? workingPlayableGames
+        : sites;
+
+    if (pool.length === 0) return;
+
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+    // Programmatically launch via anchor click to avoid popup blocking
+    const link = document.createElement('a');
+    link.href = chosen.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Show toast notification with direct play link
+    setRandomGameToast({
+      name: chosen.name,
+      url: chosen.url,
+      rank: chosen.rank,
+    });
   };
 
   // Gate check: If locked, render the passcode gate screen
@@ -153,7 +284,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans">
+    <div className="h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans overflow-hidden">
       {/* Top Bar (Kept clean without Best Websites) */}
       <Navbar
         currentView={currentView}
@@ -162,9 +293,11 @@ export default function App() {
         onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
         totalSites={sites.length}
         onLockVault={handleLock}
+        onOpenWhatsNew={handleOpenWhatsNew}
+        onLaunchRandomGame={handleLaunchRandomGame}
       />
 
-      <div className="flex flex-1 max-w-7xl w-full mx-auto">
+      <div className="flex flex-1 overflow-hidden max-w-7xl w-full mx-auto">
         {/* Sidebar / 3-Line Menu */}
         <Sidebar
           categories={categories}
@@ -185,13 +318,14 @@ export default function App() {
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth focus:outline-none">
           {currentView === 'home' && (
             <HomePage
               onNavigate={handleNavigate}
               onSelectCategory={handleSelectCategory}
               categories={categories}
               sites={sites}
+              onOpenWhatsNew={handleOpenWhatsNew}
             />
           )}
 
@@ -286,6 +420,33 @@ export default function App() {
           <span>Unlocked</span>
         </div>
       )}
+
+      {/* Random Game Launch Toast */}
+      {randomGameToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/50 bg-neutral-900/95 px-4 py-2.5 shadow-2xl backdrop-blur-md text-xs sm:text-sm font-sans tracking-wide animate-toast-in shadow-emerald-500/20 max-w-sm sm:max-w-md w-auto">
+          <DiceIcon className="h-5 w-5 shrink-0 rounded-[3px] shadow-xs" />
+          <div className="truncate">
+            <span className="text-neutral-400 text-[11px] block">Launching Random Game:</span>
+            <span className="text-emerald-400 font-bold truncate block">
+              {randomGameToast.name} {randomGameToast.rank ? `(#${randomGameToast.rank})` : ''}
+            </span>
+          </div>
+          <a
+            href={randomGameToast.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-2.5 py-1 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap ml-2 cursor-pointer"
+          >
+            Play Now ↗
+          </a>
+        </div>
+      )}
+
+      {/* What's New in v1.2 Modal */}
+      <WhatsNewModal
+        isOpen={showWhatsNewModal}
+        onClose={() => setShowWhatsNewModal(false)}
+      />
     </div>
   );
 }

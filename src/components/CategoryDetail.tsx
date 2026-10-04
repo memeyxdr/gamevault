@@ -11,9 +11,11 @@ import {
   Copy,
   Check,
   Trophy,
+  Shield,
 } from 'lucide-react';
 import { Category, GameSiteLink } from '../types';
 import { CategoryIcon } from './CategoryIcon';
+import { openInAboutBlank } from '../utils/stealthLaunch';
 
 interface CategoryDetailProps {
   category: Category;
@@ -259,19 +261,30 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
                   )}
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs text-neutral-400">
-                  <span className="font-mono text-[11px] text-neutral-500 truncate max-w-[120px]">
+                <div className="mt-4 pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs text-neutral-400 gap-1.5">
+                  <span className="font-mono text-[11px] text-neutral-500 truncate max-w-[90px] sm:max-w-[110px]">
                     {site.domain}
                   </span>
-                  <a
-                    href={site.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1 text-neutral-300 hover:text-white transition-colors"
-                  >
-                    <span>Visit Site</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => openInAboutBlank(site.url, site.name)}
+                      className="inline-flex items-center gap-1 rounded bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700/60 px-1.5 py-0.5 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
+                      title="Open in about:blank (Stealth cloaked tab / popup launcher)"
+                    >
+                      <Shield className="h-3 w-3 text-emerald-400" />
+                      <span>about:blank</span>
+                    </button>
+                    <a
+                      href={site.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-neutral-300 hover:text-white transition-colors"
+                    >
+                      <span>Visit Site</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
                 </div>
               </div>
             );
