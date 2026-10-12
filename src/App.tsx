@@ -15,12 +15,14 @@ import { SitesDirectory } from './components/SitesDirectory';
 import { HomePage } from './components/HomePage';
 import { PasscodeGate } from './components/PasscodeGate';
 import { WhatsNewModal, WHATS_NEW_STORAGE_KEY } from './components/WhatsNewModal';
+import { EarlyDevModal, EARLY_DEV_STORAGE_KEY } from './components/EarlyDevModal';
+import { QuickReturnFeedbackModal } from './components/QuickReturnFeedbackModal';
 import { DiceIcon } from './components/DiceIcon';
 
 const STORAGE_KEYS = {
-  CATEGORIES: 'gamevault_categories_v12',
-  SITES: 'gamevault_sites_v12',
-  STARRED: 'gamevault_starred_sites_v12',
+  CATEGORIES: 'gamevault_categories_v13',
+  SITES: 'gamevault_sites_v13',
+  STARRED: 'gamevault_starred_sites_v13',
 };
 
 export default function App() {
@@ -28,6 +30,7 @@ export default function App() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockToast, setShowUnlockToast] = useState(false);
   const [showWhatsNewModal, setShowWhatsNewModal] = useState(false);
+  const [showEarlyDevModal, setShowEarlyDevModal] = useState(false);
   const [randomGameToast, setRandomGameToast] = useState<{
     name: string;
     url: string;
@@ -38,7 +41,9 @@ export default function App() {
   // By default, NO sites are starred (empty array)
   const [starredSiteIds, setStarredSiteIds] = useState<string[]>(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEYS.STARRED);
+      const stored =
+        localStorage.getItem(STORAGE_KEYS.STARRED) ||
+        localStorage.getItem('gamevault_starred_sites_v12');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) return parsed;
@@ -67,7 +72,24 @@ export default function App() {
       const stored = localStorage.getItem(STORAGE_KEYS.SITES);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const initialMap = new Map(INITIAL_SITE_LINKS.map((s) => [s.id, s]));
+          let updated = parsed.map((s: GameSiteLink) => {
+            if (s.id === 'site-pixvibes') {
+              return { ...s, name: 'ScholarNest', rank: 1, isBestGame: true };
+            }
+            const init = initialMap.get(s.id);
+            if (init && init.isBestGame) {
+              return { ...s, rank: init.rank, isBestGame: init.isBestGame };
+            }
+            return s;
+          });
+          if (!updated.some((s: GameSiteLink) => s.id === 'site-pixvibes')) {
+            const pixvibes = initialMap.get('site-pixvibes');
+            if (pixvibes) updated = [pixvibes, ...updated];
+          }
+          return updated;
+        }
       }
       return INITIAL_SITE_LINKS;
     } catch {
@@ -87,8 +109,98 @@ export default function App() {
   // Navigation & View States - Default to Home page
   const [currentView, setCurrentView] = useState<ViewMode>('home');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarSearchQuery, setSidebarSearchQuery] = useState('');
+  const [directorySearchQuery, setDirectorySearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Quick return detection: if a user returns to GameVault within 5 seconds after opening a link
+  const lastOpenedLinkRef = React.useRef<{
+    url: string;
+    name?: string;
+    timestamp: number;
+  } | null>(null);
+  const [quickReturnModal, setQuickReturnModal] = useState<{
+    isOpen: boolean;
+    siteName?: string;
+    openedUrl?: string;
+  }>({
+    isOpen: false,
+  });
+
+  const recordLinkOpened = (url: string, name?: string) => {
+    lastOpenedLinkRef.current = {
+      url,
+      name,
+      timestamp: Date.now(),
+    };
+  };
+
+  // Listen to global document click on external links + window focus / visibilitychange
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const anchor = target.closest('a');
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      const targetAttr = anchor.getAttribute('target');
+
+      // Check if it's an external link or opens in a new tab
+      if (
+        href &&
+        (targetAttr === '_blank' || href.startsWith('http://') || href.startsWith('https://')) &&
+        !href.includes('forms/d/e/1FAIpQLSel_qnMs80ZZIFoIgV-VqPEvOd6ZDZjtbr-32cb9KHXrVuCqw') // don't trigger when clicking the error report itself
+      ) {
+        // Find human readable title or anchor text
+        const anchorText =
+          anchor.getAttribute('aria-label') ||
+          anchor.innerText?.trim().slice(0, 50) ||
+          anchor.title ||
+          undefined;
+
+        lastOpenedLinkRef.current = {
+          url: href,
+          name: anchorText,
+          timestamp: Date.now(),
+        };
+      }
+    };
+
+    const handleWindowReturn = () => {
+      if (!lastOpenedLinkRef.current) return;
+      const { url, name, timestamp } = lastOpenedLinkRef.current;
+      const elapsed = Date.now() - timestamp;
+
+      // Reset immediately to prevent multiple triggers
+      lastOpenedLinkRef.current = null;
+
+      // If user came back between 250ms and 5000ms (5 seconds)
+      if (elapsed >= 250 && elapsed <= 5000) {
+        setQuickReturnModal({
+          isOpen: true,
+          siteName: name,
+          openedUrl: url,
+        });
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleWindowReturn();
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+    window.addEventListener('focus', handleWindowReturn);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('click', handleGlobalClick, true);
+      window.removeEventListener('focus', handleWindowReturn);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // Sync to localStorage
   useEffect(() => {
@@ -190,13 +302,18 @@ export default function App() {
     }, 1800);
 
     // Passcode Unlock Trigger:
-    // As soon as the user enters the authorized passcode to unlock the vault,
-    // the modal automatically displays on the screen unless already dismissed
-    // in persistent localStorage (gamevault_seen_v1_1_modal).
+    // 1. If user hasn't seen the v1.2 release notes yet, show them first.
+    //    When they exit the release notes, the early dev popup automatically displays.
+    // 2. If user already saw release notes in the past (existing user returning after popup was added),
+    //    trigger the one-time early development notice immediately upon unlock.
     try {
-      const hasSeen = localStorage.getItem(WHATS_NEW_STORAGE_KEY);
-      if (!hasSeen) {
+      const hasSeenWhatsNew = localStorage.getItem(WHATS_NEW_STORAGE_KEY);
+      const hasSeenEarlyDev = localStorage.getItem(EARLY_DEV_STORAGE_KEY);
+
+      if (!hasSeenWhatsNew) {
         setShowWhatsNewModal(true);
+      } else if (!hasSeenEarlyDev) {
+        setShowEarlyDevModal(true);
       }
     } catch {
       setShowWhatsNewModal(true);
@@ -207,11 +324,35 @@ export default function App() {
     setIsUnlocked(false);
     setShowUnlockToast(false);
     setShowWhatsNewModal(false);
+    setShowEarlyDevModal(false);
     setRandomGameToast(null);
   };
 
   const handleOpenWhatsNew = () => {
     setShowWhatsNewModal(true);
+  };
+
+  const handleCloseWhatsNew = () => {
+    setShowWhatsNewModal(false);
+    try {
+      const hasSeenEarlyDev = localStorage.getItem(EARLY_DEV_STORAGE_KEY);
+      if (!hasSeenEarlyDev) {
+        setTimeout(() => {
+          setShowEarlyDevModal(true);
+        }, 220);
+      }
+    } catch {
+      // storage unavailable
+    }
+  };
+
+  const handleCloseEarlyDev = () => {
+    setShowEarlyDevModal(false);
+    try {
+      localStorage.setItem(EARLY_DEV_STORAGE_KEY, 'true');
+    } catch {
+      // storage unavailable
+    }
   };
 
   // Auto-dismiss random game toast after 4.5s
@@ -261,6 +402,8 @@ export default function App() {
 
     const chosen = pool[Math.floor(Math.random() * pool.length)];
 
+    recordLinkOpened(chosen.url, chosen.name);
+
     // Programmatically launch via anchor click to avoid popup blocking
     const link = document.createElement('a');
     link.href = chosen.url;
@@ -294,7 +437,9 @@ export default function App() {
         totalSites={sites.length}
         onLockVault={handleLock}
         onOpenWhatsNew={handleOpenWhatsNew}
+        onOpenEarlyDev={() => setShowEarlyDevModal(true)}
         onLaunchRandomGame={handleLaunchRandomGame}
+        onOpenLink={(url, name) => recordLinkOpened(url, name)}
       />
 
       <div className="flex flex-1 overflow-hidden max-w-7xl w-full mx-auto">
@@ -311,8 +456,8 @@ export default function App() {
           bestGamesCount={bestGamesCount}
           bestWebsitesCount={bestWebsitesCount}
           favoriteSitesCount={favoriteSitesCount}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={sidebarSearchQuery}
+          onSearchChange={setSidebarSearchQuery}
           isOpenOnMobile={mobileMenuOpen}
           onCloseMobile={() => setMobileMenuOpen(false)}
         />
@@ -339,8 +484,8 @@ export default function App() {
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
               onSelectCategory={handleSelectCategory}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              searchQuery={directorySearchQuery}
+              onSearchChange={setDirectorySearchQuery}
             />
           )}
 
@@ -354,8 +499,8 @@ export default function App() {
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
               onSelectCategory={handleSelectCategory}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              searchQuery={directorySearchQuery}
+              onSearchChange={setDirectorySearchQuery}
             />
           )}
 
@@ -369,8 +514,8 @@ export default function App() {
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
               onSelectCategory={handleSelectCategory}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              searchQuery={directorySearchQuery}
+              onSearchChange={setDirectorySearchQuery}
             />
           )}
 
@@ -406,8 +551,8 @@ export default function App() {
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
               onSelectCategory={handleSelectCategory}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              searchQuery={directorySearchQuery}
+              onSearchChange={setDirectorySearchQuery}
             />
           )}
         </main>
@@ -415,19 +560,19 @@ export default function App() {
 
       {/* Brief Bottom Confirmation Toast */}
       {showUnlockToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-emerald-500/50 bg-neutral-900/95 px-5 py-2.5 shadow-2xl backdrop-blur-md text-emerald-400 text-xs sm:text-sm font-semibold tracking-wide font-mono animate-toast-in shadow-emerald-500/20">
-          <Check className="h-4 w-4 text-emerald-400 stroke-[3]" />
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-orange-500/50 bg-neutral-900/95 px-5 py-2.5 shadow-2xl backdrop-blur-md text-orange-400 text-xs sm:text-sm font-semibold tracking-wide font-mono animate-toast-in shadow-orange-500/20">
+          <Check className="h-4 w-4 text-orange-400 stroke-[3]" />
           <span>Unlocked</span>
         </div>
       )}
 
       {/* Random Game Launch Toast */}
       {randomGameToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/50 bg-neutral-900/95 px-4 py-2.5 shadow-2xl backdrop-blur-md text-xs sm:text-sm font-sans tracking-wide animate-toast-in shadow-emerald-500/20 max-w-sm sm:max-w-md w-auto">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-orange-500/50 bg-neutral-900/95 px-4 py-2.5 shadow-2xl backdrop-blur-md text-xs sm:text-sm font-sans tracking-wide animate-toast-in shadow-orange-500/20 max-w-sm sm:max-w-md w-auto">
           <DiceIcon className="h-5 w-5 shrink-0 rounded-[3px] shadow-xs" />
           <div className="truncate">
             <span className="text-neutral-400 text-[11px] block">Launching Random Game:</span>
-            <span className="text-emerald-400 font-bold truncate block">
+            <span className="text-orange-400 font-bold truncate block">
               {randomGameToast.name} {randomGameToast.rank ? `(#${randomGameToast.rank})` : ''}
             </span>
           </div>
@@ -435,7 +580,7 @@ export default function App() {
             href={randomGameToast.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-2.5 py-1 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap ml-2 cursor-pointer"
+            className="rounded-lg bg-orange-500 hover:bg-orange-400 text-neutral-950 px-2.5 py-1 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap ml-2 cursor-pointer"
           >
             Play Now ↗
           </a>
@@ -445,7 +590,21 @@ export default function App() {
       {/* What's New in v1.2 Modal */}
       <WhatsNewModal
         isOpen={showWhatsNewModal}
-        onClose={() => setShowWhatsNewModal(false)}
+        onClose={handleCloseWhatsNew}
+      />
+
+      {/* One-time Early Development Notice */}
+      <EarlyDevModal
+        isOpen={showEarlyDevModal}
+        onClose={handleCloseEarlyDev}
+      />
+
+      {/* Quick Return Link Problem Assistant Modal */}
+      <QuickReturnFeedbackModal
+        isOpen={quickReturnModal.isOpen}
+        siteName={quickReturnModal.siteName}
+        openedUrl={quickReturnModal.openedUrl}
+        onClose={() => setQuickReturnModal({ isOpen: false })}
       />
     </div>
   );

@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { ViewMode, GameSiteLink, Category } from '../types';
+import { PumpkinIcon } from './PumpkinIcon';
 
 interface HomePageProps {
   onNavigate: (view: ViewMode) => void;
@@ -34,13 +35,14 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="space-y-10 pb-16 pt-2">
-      {/* 1. HERO BANNER */}
-      <section className="relative overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 p-6 sm:p-10 shadow-2xl">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+      {/* 1. HERO BANNER - Halloween Atmospheric Looks */}
+      <section className="relative overflow-hidden rounded-2xl border border-orange-950/40 bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 p-6 sm:p-10 shadow-2xl">
+        {/* Halloween Jack-o'-Lantern & Witch-Purple Glows */}
+        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-72 w-72 rounded-full bg-orange-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 -mb-20 h-64 w-64 rounded-full bg-purple-600/15 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-orange-400">
             <Flame className="h-3.5 w-3.5" />
             <span>Official Vault Directory & Hub</span>
           </div>
@@ -49,20 +51,20 @@ export const HomePage: React.FC<HomePageProps> = ({
             <button
               type="button"
               onClick={onOpenWhatsNew}
-              className="text-left hover:text-emerald-300 transition-colors cursor-pointer"
-              title="Click to view What's new in v1.2"
+              className="text-left hover:text-orange-300 transition-colors cursor-pointer flex items-center gap-2"
+              title="Click to view What's new in v1.3"
             >
-              GameVault <span className="text-emerald-400">HQ</span>
+              <span>GameVault</span> <span className="text-orange-400">HQ</span>
             </button>
             {onOpenWhatsNew && (
               <button
                 type="button"
                 onClick={onOpenWhatsNew}
-                className="inline-flex items-center gap-1.5 text-xs font-mono font-medium rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-mono font-medium rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-orange-400 hover:bg-orange-500/20 transition-all cursor-pointer"
                 title="View changelog"
               >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>v1.2 Update</span>
+                <PumpkinIcon className="h-3.5 w-3.5" />
+                <span>v1.3 Halloween</span>
               </button>
             )}
           </h1>
@@ -76,7 +78,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('all-sites')}
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-neutral-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-all active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2.5 text-xs sm:text-sm font-bold text-neutral-950 shadow-lg shadow-orange-500/20 hover:bg-orange-400 transition-all active:scale-[0.98]"
             >
               <Gamepad2 className="h-4 w-4" />
               <span>Browse All Sites ({sites.length})</span>
@@ -96,10 +98,13 @@ export const HomePage: React.FC<HomePageProps> = ({
               <button
                 type="button"
                 onClick={onOpenWhatsNew}
-                className="inline-flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800/80 px-4 py-2.5 text-xs sm:text-sm font-semibold text-neutral-200 hover:bg-neutral-800 hover:text-white transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800/80 px-4 py-2.5 text-xs sm:text-sm font-semibold text-neutral-200 hover:border-orange-500/40 hover:text-orange-300 transition-all cursor-pointer"
               >
-                <Sparkles className="h-4 w-4 text-emerald-400" />
-                <span>What's new in v1.2</span>
+                <PumpkinIcon className="h-4 w-4" />
+                <span>What's new in v1.3</span>
+                <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.5 text-[10px] font-mono font-medium text-orange-300">
+                  Major Release
+                </span>
               </button>
             )}
           </div>
@@ -110,13 +115,13 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         <div
           onClick={() => onNavigate('all-sites')}
-          className="cursor-pointer group rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-neutral-700 hover:bg-neutral-900 transition-all"
+          className="cursor-pointer group rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-orange-500/40 hover:bg-neutral-900 transition-all"
         >
           <div className="flex items-center justify-between text-neutral-400 text-xs">
             <span>Total Sites</span>
-            <Gamepad2 className="h-4 w-4 text-emerald-400" />
+            <Gamepad2 className="h-4 w-4 text-orange-400" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-white group-hover:text-emerald-400 transition-colors">
+          <div className="mt-2 text-2xl font-bold font-mono text-white group-hover:text-orange-400 transition-colors">
             {sites.length}
           </div>
           <p className="mt-1 text-[11px] text-neutral-400">Indexed & tested</p>
@@ -138,13 +143,13 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         <div
           onClick={() => onNavigate('categories')}
-          className="cursor-pointer group rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-neutral-700 hover:bg-neutral-900 transition-all"
+          className="cursor-pointer group rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-purple-500/40 hover:bg-neutral-900 transition-all"
         >
           <div className="flex items-center justify-between text-neutral-400 text-xs">
             <span>Categories</span>
-            <Layers className="h-4 w-4 text-sky-400" />
+            <Layers className="h-4 w-4 text-purple-400" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-white group-hover:text-sky-400 transition-colors">
+          <div className="mt-2 text-2xl font-bold font-mono text-white group-hover:text-purple-400 transition-colors">
             {categories.length}
           </div>
           <p className="mt-1 text-[11px] text-neutral-400">Organized vaults</p>
@@ -152,7 +157,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         <div
           onClick={() => onNavigate('favorites')}
-          className="cursor-pointer group rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-neutral-700 hover:bg-neutral-900 transition-all"
+          className="cursor-pointer group rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-amber-500/40 hover:bg-neutral-900 transition-all"
         >
           <div className="flex items-center justify-between text-neutral-400 text-xs">
             <span>Starred</span>
@@ -169,13 +174,13 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Compass className="h-5 w-5 text-emerald-400" />
+            <Compass className="h-5 w-5 text-orange-400" />
             <h2 className="text-xl font-bold tracking-tight text-white">Vault Highlights</h2>
           </div>
           <button
             type="button"
             onClick={() => onNavigate('categories')}
-            className="text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 transition-colors"
+            className="text-xs text-orange-400 hover:text-orange-300 font-medium flex items-center gap-1 transition-colors"
           >
             <span>View All Categories</span>
             <ArrowRight className="h-3 w-3" />
@@ -190,13 +195,13 @@ export const HomePage: React.FC<HomePageProps> = ({
           >
             <div className="flex items-center justify-between mb-2">
               <Trophy className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-              <span className="font-mono text-xs font-bold text-yellow-400">#1 to #9</span>
+              <span className="font-mono text-xs font-bold text-yellow-400">#1 to #10</span>
             </div>
             <h3 className="text-sm font-semibold text-white group-hover:text-yellow-300 transition-colors">
               Best Games List
             </h3>
             <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
-              The top 9 titles including unlocked thingy, Invisible games, and Seraph.
+              The top 10 titles including ScholarNest, unlocked thingy, and Invisible games.
             </p>
           </div>
 
@@ -207,13 +212,13 @@ export const HomePage: React.FC<HomePageProps> = ({
           >
             <div className="flex items-center justify-between mb-2">
               <Medal className="h-5 w-5 text-amber-400 fill-amber-400" />
-              <span className="font-mono text-xs font-bold text-amber-400">#1 & #2</span>
+              <span className="font-mono text-xs font-bold text-amber-400">#1 to #3</span>
             </div>
             <h3 className="text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
               Best Websites
             </h3>
             <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
-              SoundCloud (Unblocked Music) & SZVY Central v2 (Unblocked Movies).
+              anyproxy.site (#1), SoundCloud (#2), and SZVY Central v2 (#3).
             </p>
           </div>
 
@@ -224,13 +229,13 @@ export const HomePage: React.FC<HomePageProps> = ({
               if (directCat) onSelectCategory(directCat.id);
               else onNavigate('all-sites');
             }}
-            className="cursor-pointer group rounded-xl border border-rose-500/30 bg-neutral-900/60 p-4 transition-all hover:border-rose-500/60 hover:bg-neutral-900 hover:shadow-lg hover:shadow-rose-500/5"
+            className="cursor-pointer group rounded-xl border border-orange-500/30 bg-neutral-900/60 p-4 transition-all hover:border-orange-500/60 hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-500/5"
           >
             <div className="flex items-center justify-between mb-2">
-              <Gamepad2 className="h-5 w-5 text-rose-400" />
-              <span className="font-mono text-xs font-bold text-rose-400">Direct Play</span>
+              <Gamepad2 className="h-5 w-5 text-orange-400" />
+              <span className="font-mono text-xs font-bold text-orange-400">Direct Play</span>
             </div>
-            <h3 className="text-sm font-semibold text-white group-hover:text-rose-300 transition-colors">
+            <h3 className="text-sm font-semibold text-white group-hover:text-orange-300 transition-colors">
               Direct Game Instances
             </h3>
             <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
@@ -245,13 +250,13 @@ export const HomePage: React.FC<HomePageProps> = ({
               if (mediaCat) onSelectCategory(mediaCat.id);
               else onNavigate('all-sites');
             }}
-            className="cursor-pointer group rounded-xl border border-sky-500/30 bg-neutral-900/60 p-4 transition-all hover:border-sky-500/60 hover:bg-neutral-900 hover:shadow-lg hover:shadow-sky-500/5"
+            className="cursor-pointer group rounded-xl border border-purple-500/30 bg-neutral-900/60 p-4 transition-all hover:border-purple-500/60 hover:bg-neutral-900 hover:shadow-lg hover:shadow-purple-500/5"
           >
             <div className="flex items-center justify-between mb-2">
-              <Sparkles className="h-5 w-5 text-sky-400" />
-              <span className="font-mono text-xs font-bold text-sky-400">Emulators</span>
+              <Sparkles className="h-5 w-5 text-purple-400" />
+              <span className="font-mono text-xs font-bold text-purple-400">Emulators</span>
             </div>
-            <h3 className="text-sm font-semibold text-white group-hover:text-sky-300 transition-colors">
+            <h3 className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">
               Web Tools & Emulators
             </h3>
             <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
@@ -285,7 +290,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               href={site.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col justify-between rounded-xl border border-neutral-800 bg-neutral-900/70 p-4 hover:border-neutral-700 hover:bg-neutral-900 transition-all hover:shadow-md"
+              className="group flex flex-col justify-between rounded-xl border border-neutral-800 bg-neutral-900/70 p-4 hover:border-orange-500/40 hover:bg-neutral-900 transition-all hover:shadow-md"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -295,11 +300,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                         #{site.rank}
                       </span>
                     )}
-                    <h4 className="text-sm font-semibold text-white group-hover:text-emerald-400 transition-colors">
+                    <h4 className="text-sm font-semibold text-white group-hover:text-orange-400 transition-colors">
                       {site.name}
                     </h4>
                   </div>
-                  <ExternalLink className="h-3.5 w-3.5 text-neutral-400 group-hover:text-neutral-200 transition-colors shrink-0" />
+                  <ExternalLink className="h-3.5 w-3.5 text-neutral-400 group-hover:text-orange-300 transition-colors shrink-0" />
                 </div>
                 <p className="text-xs text-neutral-400 line-clamp-2">
                   {site.description}
@@ -307,7 +312,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div className="mt-3 pt-2.5 border-t border-neutral-800/80 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
-                <span className="text-emerald-400 font-sans">Active Game</span>
+                <span className="text-orange-400 font-sans">Active Game</span>
                 <span className="text-neutral-400 group-hover:text-white transition-colors">Launch ↗</span>
               </div>
             </a>

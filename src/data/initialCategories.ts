@@ -59,8 +59,22 @@ export const INITIAL_CATEGORIES: Category[] = [
 
 export const INITIAL_SITE_LINKS: GameSiteLink[] = [
   // ==========================================
-  // BEST GAMES LEADERBOARD (1-9)
+  // BEST GAMES LEADERBOARD (1-10)
   // ==========================================
+  {
+    id: 'site-pixvibes',
+    name: 'ScholarNest',
+    url: 'https://pixvibes.sbs',
+    domain: 'pixvibes.sbs',
+    categoryId: 'cat-proxies',
+    specialNotice: 'Rank #1 Best Game • Working Proxy (+1,500 Games)',
+    description: 'Working unblocked web proxy and gaming portal featuring a massive library of +1,500 games. Ranked #1 in Best Games.',
+    tags: ['scholarnest', 'pixvibes', 'proxy', 'unblocker', 'games', '1500-games', 'working-proxy', 'leaderboard', 'best-games'],
+    isFavorite: false,
+    isBestGame: true,
+    rank: 1,
+    dateAdded: '2026-10-11T20:40:00.000Z',
+  },
   {
     id: 'site-unlocked-thingy',
     name: 'unlocked thingy',
@@ -73,7 +87,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['proxy', 'unblocker', 'hollow-knight', 'fortnite', 'password-required', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 1,
+    rank: 2,
     dateAdded: '2026-10-01T20:18:00.000Z',
   },
   {
@@ -86,7 +100,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['interactive', 'clean-ui', 'activities', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 2,
+    rank: 3,
     dateAdded: '2026-10-01T20:38:00.000Z',
   },
   {
@@ -99,7 +113,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['github-pages', 'seraph', 'collection', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 3,
+    rank: 4,
     dateAdded: '2026-10-01T20:38:00.000Z',
   },
   {
@@ -113,7 +127,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['portal', 'github-pages', 'web-games', 'leaderboard', 'unblocked'],
     isFavorite: false,
     isBestGame: true,
-    rank: 4,
+    rank: 5,
     dateAdded: '2026-10-01T20:18:00.000Z',
   },
   {
@@ -126,7 +140,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['interactive', 'sandbox', 'infinite-craft', 'experiments', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 5,
+    rank: 6,
     dateAdded: '2026-10-01T20:38:00.000Z',
   },
   {
@@ -139,7 +153,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['google-sites', 'classic', 'archive', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 6,
+    rank: 7,
     dateAdded: '2026-10-01T20:38:00.000Z',
   },
   {
@@ -152,7 +166,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['idle', 'cookie-clicker', 'stock-market', 'pantheon', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 7,
+    rank: 8,
     dateAdded: '2026-10-01T20:38:00.000Z',
   },
   {
@@ -165,7 +179,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['github-pages', 'portal', 'central-hub', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 8,
+    rank: 9,
     dateAdded: '2026-10-01T20:18:00.000Z',
   },
   {
@@ -178,13 +192,27 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['simulation', 'physics', 'liquid', 'particle', 'leaderboard'],
     isFavorite: false,
     isBestGame: true,
-    rank: 9,
+    rank: 10,
     dateAdded: '2026-10-01T20:38:00.000Z',
   },
 
   // ==========================================
   // BEST WEBSITES (Gold Medal Section)
   // ==========================================
+  {
+    id: 'site-anyproxy',
+    name: 'anyproxy.site',
+    url: 'https://anyproxy.site',
+    domain: 'anyproxy.site',
+    categoryId: 'cat-proxies',
+    specialNotice: 'Rank #1 Proxy',
+    description: 'High-speed unblocked web proxy and stealth gateway for accessing games and restricted websites.',
+    tags: ['proxy', 'unblocker', 'stealth', 'web-proxy', 'best-websites'],
+    isFavorite: false,
+    isBestWebsite: true,
+    rank: 1,
+    dateAdded: '2026-10-10T14:55:00.000Z',
+  },
   {
     id: 'site-soundcloud',
     name: 'SoundCloud',
@@ -196,7 +224,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['music', 'unblocked', 'audio', 'streaming', 'best-websites'],
     isFavorite: false,
     isBestWebsite: true,
-    rank: 1,
+    rank: 2,
     dateAdded: '2026-10-01T20:52:00.000Z',
   },
   {
@@ -210,7 +238,7 @@ export const INITIAL_SITE_LINKS: GameSiteLink[] = [
     tags: ['movies', 'streaming', 'shows', 'unblocked', 'best-websites'],
     isFavorite: false,
     isBestWebsite: true,
-    rank: 2,
+    rank: 3,
     dateAdded: '2026-10-01T21:20:00.000Z',
   },
 

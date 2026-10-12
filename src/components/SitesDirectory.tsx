@@ -13,11 +13,9 @@ import {
   Trophy,
   Medal,
   X,
-  Shield,
 } from 'lucide-react';
 import { Category, GameSiteLink, DisplayDensity } from '../types';
 import { CategoryIcon } from './CategoryIcon';
-import { openInAboutBlank } from '../utils/stealthLaunch';
 
 interface SitesDirectoryProps {
   sites: GameSiteLink[];
@@ -420,29 +418,18 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
 
                   {/* Block Footer */}
                   <div className="mt-4 pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs gap-1.5">
-                    <span className="font-mono text-[11px] text-neutral-400 truncate max-w-[90px] sm:max-w-[110px]">
+                    <span className="font-mono text-[11px] text-neutral-400 truncate max-w-[120px] sm:max-w-[150px]">
                       {site.domain}
                     </span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => openInAboutBlank(site.url, site.name)}
-                        className="inline-flex items-center gap-1 rounded bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700/60 px-1.5 py-0.5 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
-                        title="Open in about:blank (Stealth cloaked tab / popup launcher)"
-                      >
-                        <Shield className="h-3 w-3 text-emerald-400" />
-                        <span>about:blank</span>
-                      </button>
-                      <a
-                        href={site.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 font-medium text-neutral-200 hover:text-white transition-colors"
-                      >
-                        <span>Open Link</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </div>
+                    <a
+                      href={site.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 font-medium text-neutral-200 hover:text-white transition-colors"
+                    >
+                      <span>Open Link</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   </div>
                 </div>
               );
@@ -591,15 +578,6 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                           site.isFavorite ? 'fill-amber-400 text-amber-400' : ''
                         }`}
                       />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openInAboutBlank(site.url, site.name)}
-                      className="flex items-center gap-1 rounded border border-emerald-500/30 bg-emerald-950/40 hover:bg-emerald-900/50 px-2 py-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
-                      title="Open in about:blank (Stealth cloaked tab / popup launcher)"
-                    >
-                      <Shield className="h-3 w-3 text-emerald-400" />
-                      <span>about:blank</span>
                     </button>
                     <a
                       href={site.url}

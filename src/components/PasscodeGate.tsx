@@ -145,13 +145,13 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
   const isLockedOut = lockoutRemaining > 0;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#0a0a0a] px-4 py-8 relative overflow-hidden select-none">
-      {/* Background warm orange & dark ambient glows */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-red-950/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#09090b] px-4 py-8 relative overflow-hidden select-none">
+      {/* Background Halloween pumpkin orange & purple ambient glows */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-orange-500/12 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
       <div
-        className={`w-full max-w-md rounded-2xl border border-neutral-800 bg-[#121316]/95 backdrop-blur-xl p-6 sm:p-8 shadow-2xl relative z-10 transition-transform ${
+        className={`w-full max-w-md rounded-2xl border border-orange-950/40 bg-[#121316]/95 backdrop-blur-xl p-6 sm:p-8 shadow-2xl relative z-10 transition-transform shadow-orange-500/5 ${
           isShaking ? 'animate-shake' : ''
         }`}
       >
@@ -161,13 +161,13 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
             className={`flex h-16 w-16 items-center justify-center rounded-2xl border transition-colors ${
               isLockedOut
                 ? 'bg-red-950/80 border-red-700/80 text-red-400'
-                : 'bg-[#181a1d] border-neutral-800 text-amber-400'
+                : 'bg-[#181a1d] border-orange-500/30 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.15)]'
             }`}
           >
             {isLockedOut ? (
               <Clock className="h-7 w-7 animate-pulse" />
             ) : (
-              <Lock className="h-7 w-7 text-amber-400" />
+              <Lock className="h-7 w-7 text-orange-400" />
             )}
           </div>
 

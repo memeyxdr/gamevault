@@ -28,3 +28,4 @@ export interface GameSiteLink {
 
 export type ViewMode = 'home' | 'categories' | 'all-sites' | 'best-games' | 'best-websites' | 'favorites' | 'category-detail';
 export type DisplayDensity = 'grid' | 'list';
+

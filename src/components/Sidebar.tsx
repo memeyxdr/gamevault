@@ -96,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-14 bottom-0 left-0 z-40 w-72 flex-col border-r border-neutral-800 bg-neutral-950 p-4 transition-transform duration-200 lg:static lg:flex lg:h-full lg:shrink-0 lg:overflow-y-auto lg:translate-x-0 ${
+        className={`fixed top-14 bottom-0 left-0 z-40 w-72 flex-col border-r border-orange-950/30 bg-neutral-950 p-4 transition-transform duration-200 lg:static lg:flex lg:h-full lg:shrink-0 lg:overflow-y-auto lg:translate-x-0 ${
           isOpenOnMobile ? 'flex translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -108,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             placeholder="Search games, sites, URLs..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full rounded-md border border-neutral-800 bg-neutral-900/90 py-2 pl-9 pr-8 text-xs text-neutral-200 placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-600"
+            className="w-full rounded-md border border-neutral-800 bg-neutral-900/90 py-2 pl-9 pr-8 text-xs text-neutral-200 placeholder:text-neutral-500 focus:border-orange-500/50 focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-colors"
           />
           {searchQuery && (
             <button
@@ -314,10 +314,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Home className="h-4 w-4 text-emerald-400" />
+                      <Home className="h-4 w-4 text-orange-400" />
                       <span>Home</span>
                     </div>
-                    <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-emerald-500/20 font-bold">
+                    <span className="rounded bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-mono text-orange-400 border border-orange-500/20 font-bold">
                       HQ
                     </span>
                   </button>
