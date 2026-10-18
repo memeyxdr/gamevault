@@ -1,14 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Sparkles, ArrowRight, FileText, Menu, Smartphone, Zap, Medal, Search, AlertCircle, Globe } from 'lucide-react';
-import { DiceIcon } from './DiceIcon';
-import { PumpkinIcon } from './PumpkinIcon';
+import {
+  X,
+  Sparkles,
+  ArrowRight,
+  Menu,
+  Globe,
+  Layers,
+  AlertTriangle,
+  ShieldCheck,
+  CheckCircle2,
+  Settings,
+  Compass,
+} from 'lucide-react';
 
 interface WhatsNewModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_3_proxy_input_modal';
+export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_4_redesign_modal';
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -73,7 +83,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Background Halloween glow effects */}
+        {/* Background glow effects */}
         <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-orange-500/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-purple-600/15 blur-3xl pointer-events-none" />
 
@@ -81,16 +91,12 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
         <div className="flex items-start justify-between gap-4 p-5 sm:p-6 pb-3 border-b border-neutral-800/70 shrink-0 relative z-10">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center rounded-md bg-orange-500/20 border border-orange-500/50 px-2.5 py-0.5 text-xs font-mono font-semibold text-orange-300 shadow-sm shadow-orange-500/10">
-                Major Release
-              </span>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/10 px-2.5 py-0.5 text-xs font-mono font-medium text-orange-400">
-                <PumpkinIcon className="h-3.5 w-3.5" />
-                <span>October Halloween Update</span>
+              <div className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-2.5 py-0.5 text-xs font-mono font-medium text-orange-400">
+                <span>v1.4 Layout Redesign</span>
               </div>
             </div>
             <h2 id="whats-new-title" className="text-xl sm:text-2xl font-extrabold tracking-tight text-white font-mono flex items-center gap-2">
-              <span>What's new in v1.3</span>
+              <span>What's new in v1.4</span>
             </h2>
           </div>
 
@@ -112,155 +118,122 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               Update Highlights
             </div>
 
-            {/* Highlight: Top Bar AnyProxy Search Launcher */}
+            {/* Highlight: Settings Feature */}
             <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
-                  <Search className="h-4.5 w-4.5" />
+                  <Settings className="h-4.5 w-4.5" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      Top Bar Proxy Search Bar
+                      New: Settings
                     </h3>
                     <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
-                      New Feature
+                      Feature
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    Replaced duplicate top-bar navigation links with an instant web unblocker search bar (<span className="text-neutral-400 italic font-mono text-[11px]">"website links only"</span>). When you enter any link (like <strong className="text-orange-400 font-mono">youtube.com</strong>) and click enter, it automatically launches through <strong className="text-orange-400 font-mono">anyproxy.site/youtube.com</strong> using the formula <strong className="text-neutral-200 font-mono">anyproxy.site/(website link entered)</strong>. On first click, a safety disclaimer informs users that proxy traffic is operated externally by anyproxy.site.
-                  </p>
+                  <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
+                    <li>Added a dedicated Settings section.</li>
+                    <li>Added Dark, Light, and System theme options.</li>
+                    <li>Added preset and custom accent colors.</li>
+                    <li>Added Performance Mode for reduced visual effects.</li>
+                    <li>Added Grid and List browsing preferences.</li>
+                    <li>Added an option to open external links in a new tab.</li>
+                    <li>Added Reset Settings to Default.</li>
+                    <li>Added Reset Local Data to restore the first-visit experience by clearing supported GameVault-specific local data.</li>
+                    <li>Added persistent preferences so supported settings remain saved after refresh.</li>
+                  </ul>
                 </div>
               </div>
             </div>
 
-            {/* Highlight: Quick Return Link Problem Assistant */}
+            {/* Highlight: In-Site Browser Feature */}
             <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
-                  <AlertCircle className="h-4.5 w-4.5" />
+                  <Compass className="h-4.5 w-4.5" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      Instant Broken Link Assistance
+                      New: In-Site Browser
                     </h3>
                     <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
-                      Smart Helper
+                      Feature
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    If you open a game, proxy, or website link and immediately come back to GameVault within 5 seconds, an automatic prompt asks <strong className="text-white">"Whoa, way too fast! Did you run into a problem?"</strong> with a direct 1-click link to the official GameVault error report form so broken or blocked links can be reported and fixed quickly.
-                  </p>
+                  <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
+                    <li>Added integrated web browser directly inside the main viewing space.</li>
+                    <li>Full AnyProxy gateway routing with DuckDuckGo search integration.</li>
+                    <li>Navigation controls with Back history, Page Reload, and Go button.</li>
+                    <li>Sandboxed iframe security with fallback pop-out for restricted websites.</li>
+                  </ul>
                 </div>
               </div>
             </div>
 
-            {/* Highlight 0: anyproxy.site Ranked #1 Best Website */}
-            <div className="rounded-xl border border-amber-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-amber-500/60 shadow-sm shadow-amber-500/5">
+            {/* Highlight: Left Navigation Icon Rail */}
+            <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
               <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/15 text-amber-400">
-                  <Medal className="h-4.5 w-4.5 fill-amber-400" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
+                  <Menu className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      New Best Website: anyproxy.site (Ranked #1)
+                      Left Icon Rail Navigation
                     </h3>
-                    <span className="rounded bg-amber-500/20 border border-amber-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-amber-300">
-                      Rank #1
+                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
+                      v1.4 Redesign
                     </span>
                   </div>
                   <p className="text-xs text-neutral-300 leading-relaxed">
-                    Added <strong className="text-amber-300 font-mono">anyproxy.site</strong> to the directory under <strong className="text-neutral-200">Unblockers & Proxies</strong> and crowned it as the new <strong className="text-amber-300">#1 Best Website</strong>. Premier stealth proxy for bypassing school restrictions and firewalls with high-speed browsing.
+                    Replaced the bulky text sidebar with a sleek, ergonomic vertical icon rail. Features comfortable button sizes with floating hover tooltips, freeing up massive screen space for the games and proxy directory.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Highlight 1: Halloween Seasonal Theme */}
-            <div className="rounded-xl border border-orange-500/30 bg-neutral-950/70 p-3.5 transition-colors hover:border-orange-500/50">
+            {/* Highlight: One-Icon Categories Shortcut */}
+            <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
               <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/10 text-orange-400">
-                  <PumpkinIcon className="h-5 w-5" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
+                  <Layers className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-neutral-100">
-                      Halloween Seasonal Theme & Looks
+                    <h3 className="text-xs sm:text-sm font-semibold text-white">
+                      One-Icon Categories Space
                     </h3>
-                    <span className="rounded bg-orange-500/15 border border-orange-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-orange-300">
-                      October Edition
+                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
+                      Quick Access
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    Celebratory October Halloween visuals featuring glowing Jack-o'-Lantern pumpkin orange highlights, mystic witch-purple glows, and dark autumn atmospheric accents across the site.
+                  <p className="text-xs text-neutral-300 leading-relaxed">
+                    A single intuitive Categories icon on the left rail instantly opens the full Categories space, making it fast and effortless to explore portals, unblockers, GitHub pages, and media utilities.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Highlight 2: Pumpkin on the Top Bar */}
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3.5 transition-colors hover:border-neutral-700">
+            {/* Highlight: Bottom Error Reporting Button */}
+            <div className="rounded-xl border border-red-500/30 bg-neutral-950/80 p-3.5 transition-colors hover:border-red-500/50 shadow-sm shadow-red-500/5">
               <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400">
-                  <Sparkles className="h-4.5 w-4.5" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/15 text-red-400">
+                  <AlertTriangle className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-neutral-100">
-                      Top Bar Jack-o'-Lantern Pumpkin
+                    <h3 className="text-xs sm:text-sm font-semibold text-white">
+                      Rail Bottom Error Report
                     </h3>
-                    <span className="rounded bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-amber-300">
-                      New
+                    <span className="rounded bg-red-500/20 border border-red-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-red-300">
+                      Direct Form
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    Added a carved, glowing Halloween Jack-o'-Lantern icon right next to the GameVault logo on the header bar.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Highlight 3: Mobile Layout Optimization */}
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3.5 transition-colors hover:border-neutral-700">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-400">
-                  <Smartphone className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-neutral-100">
-                      Mobile Top Bar Cramping Fixed
-                    </h3>
-                    <span className="rounded bg-sky-500/15 border border-sky-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-sky-300">
-                      Polished
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    Optimized header padding and badge dimensions on mobile screens. Lock and shuffle buttons now sit comfortably without overflowing the screen.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Highlight 4: Feedback & Suggestion Forms */}
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3.5 transition-colors hover:border-neutral-700">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-400">
-                  <FileText className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-neutral-100">
-                      Feedback Forms & Early Dev Notice
-                    </h3>
-                    <span className="rounded bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-purple-300">
-                      Active
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    Direct access via sidebar and the top-bar button to report broken game mirrors or submit suggestions for new unblocked games.
+                  <p className="text-xs text-neutral-300 leading-relaxed">
+                    Pinned right at the bottom of the navigation rail for immediate 1-click access to report blocked or malfunctioning links directly to GameVault maintainers.
                   </p>
                 </div>
               </div>
@@ -288,30 +261,30 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               </div>
             </div>
 
-            {/* Highlight 5: Fast Direct Game Launches */}
+            {/* Highlight: Protected Directory Library */}
             <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3.5 transition-colors hover:border-neutral-700">
               <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                  <Zap className="h-4.5 w-4.5" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-400">
+                  <ShieldCheck className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs sm:text-sm font-semibold text-neutral-100">
-                      Pure Client-Side Speed
+                      Protected Directory Library
                     </h3>
-                    <span className="rounded bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-emerald-300">
-                      Optimized
+                    <span className="rounded bg-sky-500/15 border border-sky-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-sky-300">
+                      Catalog Integrity
                     </span>
                   </div>
                   <p className="text-xs text-neutral-400 leading-relaxed">
-                    Directory links launch immediately in new tabs with zero proxy overhead, keeping games fast and responsive.
+                    Removed accidental delete buttons and trash icons so that the community-curated list of links and proxies remains secure and permanent for everyone.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bug Fixes Section */}
+          {/* Fixes & Improvements Section */}
           <div className="space-y-2">
             <div className="text-xs font-mono font-semibold uppercase tracking-wider text-neutral-400">
               Fixes & Improvements
@@ -321,24 +294,24 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">Fixed search bar mirroring on desktop screens</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Typing into or clearing the sidebar search bar no longer mirrors onto the main directory search bar (and vice versa); both now operate independently on larger screens.</div>
+                  <div className="text-xs font-semibold text-neutral-200">Removed site deletion trash icons</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">Removed trash icons across directory and category views to prevent accidental site deletion.</div>
                 </div>
               </div>
 
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">Fixed mobile top bar overflow</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">The lock button and action icons no longer clip outside mobile screen boundaries</div>
+                  <div className="text-xs font-semibold text-neutral-200">Consolidated navigation into slim rail</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">Eliminated wide drawer layout in favor of a slim icon rail with tooltips, giving more breathing room to games.</div>
                 </div>
               </div>
 
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">Reverted experimental browser shell</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Restored the authentic, high-performance GameVault directory layout</div>
+                  <div className="text-xs font-semibold text-neutral-200">Cleaned release notes from older v1.3 items</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">Updated release notes and changelog exclusively for the v1.4 redesign.</div>
                 </div>
               </div>
             </div>
@@ -357,7 +330,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
           </button>
 
           <p className="text-center text-[11px] text-neutral-400">
-            Click the <strong className="text-orange-400">GameVault</strong> logo in the top bar anytime to view this changelog again.
+            Click the <strong className="text-orange-400">GameVault</strong> logo or version tag anytime to view this changelog again.
           </p>
         </div>
       </div>

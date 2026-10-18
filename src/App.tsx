@@ -8,6 +8,7 @@ import { Check } from 'lucide-react';
 import { Category, GameSiteLink, ViewMode } from './types';
 import { INITIAL_CATEGORIES, INITIAL_SITE_LINKS } from './data/initialCategories';
 import { Navbar } from './components/Navbar';
+import { NavRail } from './components/NavRail';
 import { Sidebar } from './components/Sidebar';
 import { CategoriesOverview } from './components/CategoriesOverview';
 import { CategoryDetail } from './components/CategoryDetail';
@@ -15,22 +16,24 @@ import { SitesDirectory } from './components/SitesDirectory';
 import { HomePage } from './components/HomePage';
 import { PasscodeGate } from './components/PasscodeGate';
 import { WhatsNewModal, WHATS_NEW_STORAGE_KEY } from './components/WhatsNewModal';
-import { EarlyDevModal, EARLY_DEV_STORAGE_KEY } from './components/EarlyDevModal';
 import { QuickReturnFeedbackModal } from './components/QuickReturnFeedbackModal';
 import { DiceIcon } from './components/DiceIcon';
+import { SettingsPage } from './components/SettingsPage';
+import { InSiteBrowser } from './components/InSiteBrowser';
+import { SettingsProvider, useSettings } from './context/SettingsContext';
 
 const STORAGE_KEYS = {
-  CATEGORIES: 'gamevault_categories_v13',
-  SITES: 'gamevault_sites_v13',
+  CATEGORIES: 'gamevault_categories_v14',
+  SITES: 'gamevault_sites_v14',
   STARRED: 'gamevault_starred_sites_v13',
 };
 
-export default function App() {
+function VaultApp() {
+  const { settings } = useSettings();
   // Passcode gate state: strictly ephemeral (resets on refresh)
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockToast, setShowUnlockToast] = useState(false);
   const [showWhatsNewModal, setShowWhatsNewModal] = useState(false);
-  const [showEarlyDevModal, setShowEarlyDevModal] = useState(false);
   const [randomGameToast, setRandomGameToast] = useState<{
     name: string;
     url: string;
@@ -69,7 +72,9 @@ export default function App() {
 
   const [rawSites, setRawSites] = useState<GameSiteLink[]>(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEYS.SITES);
+      const stored =
+        localStorage.getItem(STORAGE_KEYS.SITES) ||
+        localStorage.getItem('gamevault_sites_v13');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -78,15 +83,27 @@ export default function App() {
             if (s.id === 'site-pixvibes') {
               return { ...s, name: 'ScholarNest', rank: 1, isBestGame: true };
             }
+            if (s.id === 'site-anyproxy') {
+              return { ...s, name: 'anyproxy.site', rank: 1, isBestWebsite: true, specialNotice: 'Rank #1 Proxy' };
+            }
             const init = initialMap.get(s.id);
-            if (init && init.isBestGame) {
-              return { ...s, rank: init.rank, isBestGame: init.isBestGame };
+            if (init) {
+              if (init.isBestGame) {
+                return { ...s, rank: init.rank, isBestGame: true };
+              }
+              if (init.isBestWebsite) {
+                return { ...s, rank: init.rank, isBestWebsite: true, specialNotice: init.specialNotice || s.specialNotice };
+              }
             }
             return s;
           });
           if (!updated.some((s: GameSiteLink) => s.id === 'site-pixvibes')) {
             const pixvibes = initialMap.get('site-pixvibes');
             if (pixvibes) updated = [pixvibes, ...updated];
+          }
+          if (!updated.some((s: GameSiteLink) => s.id === 'site-anyproxy')) {
+            const anyproxy = initialMap.get('site-anyproxy');
+            if (anyproxy) updated = [anyproxy, ...updated];
           }
           return updated;
         }
@@ -108,6 +125,7 @@ export default function App() {
 
   // Navigation & View States - Default to Home page
   const [currentView, setCurrentView] = useState<ViewMode>('home');
+  const [previousView, setPreviousView] = useState<ViewMode>('home');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [sidebarSearchQuery, setSidebarSearchQuery] = useState('');
   const [directorySearchQuery, setDirectorySearchQuery] = useState('');
@@ -263,6 +281,9 @@ export default function App() {
   };
 
   const handleNavigate = (view: ViewMode) => {
+    if (currentView !== 'browser' && view === 'browser') {
+      setPreviousView(currentView);
+    }
     setCurrentView(view);
     if (view !== 'category-detail') {
       setSelectedCategoryId(null);
@@ -301,19 +322,10 @@ export default function App() {
       setShowUnlockToast(false);
     }, 1800);
 
-    // Passcode Unlock Trigger:
-    // 1. If user hasn't seen the v1.2 release notes yet, show them first.
-    //    When they exit the release notes, the early dev popup automatically displays.
-    // 2. If user already saw release notes in the past (existing user returning after popup was added),
-    //    trigger the one-time early development notice immediately upon unlock.
     try {
       const hasSeenWhatsNew = localStorage.getItem(WHATS_NEW_STORAGE_KEY);
-      const hasSeenEarlyDev = localStorage.getItem(EARLY_DEV_STORAGE_KEY);
-
       if (!hasSeenWhatsNew) {
         setShowWhatsNewModal(true);
-      } else if (!hasSeenEarlyDev) {
-        setShowEarlyDevModal(true);
       }
     } catch {
       setShowWhatsNewModal(true);
@@ -324,7 +336,6 @@ export default function App() {
     setIsUnlocked(false);
     setShowUnlockToast(false);
     setShowWhatsNewModal(false);
-    setShowEarlyDevModal(false);
     setRandomGameToast(null);
   };
 
@@ -334,25 +345,6 @@ export default function App() {
 
   const handleCloseWhatsNew = () => {
     setShowWhatsNewModal(false);
-    try {
-      const hasSeenEarlyDev = localStorage.getItem(EARLY_DEV_STORAGE_KEY);
-      if (!hasSeenEarlyDev) {
-        setTimeout(() => {
-          setShowEarlyDevModal(true);
-        }, 220);
-      }
-    } catch {
-      // storage unavailable
-    }
-  };
-
-  const handleCloseEarlyDev = () => {
-    setShowEarlyDevModal(false);
-    try {
-      localStorage.setItem(EARLY_DEV_STORAGE_KEY, 'true');
-    } catch {
-      // storage unavailable
-    }
   };
 
   // Auto-dismiss random game toast after 4.5s
@@ -407,7 +399,7 @@ export default function App() {
     // Programmatically launch via anchor click to avoid popup blocking
     const link = document.createElement('a');
     link.href = chosen.url;
-    link.target = '_blank';
+    link.target = settings.openInNewTab ? '_blank' : '_self';
     link.rel = 'noopener noreferrer';
     document.body.appendChild(link);
     link.click();
@@ -419,6 +411,31 @@ export default function App() {
       url: chosen.url,
       rank: chosen.rank,
     });
+  };
+
+  const handleRailSearchClick = () => {
+    if (
+      currentView !== 'all-sites' &&
+      currentView !== 'best-games' &&
+      currentView !== 'best-websites' &&
+      currentView !== 'favorites'
+    ) {
+      setCurrentView('all-sites');
+    }
+    setTimeout(() => {
+      const searchInput = document.querySelector<HTMLInputElement>(
+        'input[placeholder*="Search individual sites"]'
+      );
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      } else {
+        const topInput = document.querySelector<HTMLInputElement>(
+          'input[placeholder*="website links only"]'
+        );
+        topInput?.focus();
+      }
+    }, 120);
   };
 
   // Gate check: If locked, render the passcode gate screen
@@ -437,33 +454,34 @@ export default function App() {
         totalSites={sites.length}
         onLockVault={handleLock}
         onOpenWhatsNew={handleOpenWhatsNew}
-        onOpenEarlyDev={() => setShowEarlyDevModal(true)}
         onLaunchRandomGame={handleLaunchRandomGame}
         onOpenLink={(url, name) => recordLinkOpened(url, name)}
       />
 
-      <div className="flex flex-1 overflow-hidden max-w-7xl w-full mx-auto">
-        {/* Sidebar / 3-Line Menu */}
-        <Sidebar
-          categories={categories}
-          sites={sites}
-          selectedCategoryId={selectedCategoryId}
-          onSelectCategory={handleSelectCategory}
+      <div className="flex flex-1 overflow-hidden w-full">
+        {/* Left Icon Rail Navigation (v1.4 Redesign) */}
+        <NavRail
           currentView={currentView}
           onNavigate={handleNavigate}
-          siteCountByCategory={siteCountByCategory}
           totalSites={sites.length}
           bestGamesCount={bestGamesCount}
           bestWebsitesCount={bestWebsitesCount}
           favoriteSitesCount={favoriteSitesCount}
-          searchQuery={sidebarSearchQuery}
-          onSearchChange={setSidebarSearchQuery}
           isOpenOnMobile={mobileMenuOpen}
           onCloseMobile={() => setMobileMenuOpen(false)}
+          onOpenLink={(url, name) => recordLinkOpened(url, name)}
+          onSearchClick={handleRailSearchClick}
         />
 
-        {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth focus:outline-none">
+        {/* Main Content Area / Expansive Main View Space */}
+        <main
+          className={`flex-1 min-w-0 focus:outline-none ${
+            currentView === 'browser'
+              ? 'p-2 sm:p-3 overflow-hidden flex flex-col'
+              : 'p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth'
+          }`}
+        >
+          <div className={`w-full max-w-7xl mx-auto ${currentView === 'browser' ? 'h-full flex-1 flex flex-col min-h-0' : ''}`}>
           {currentView === 'home' && (
             <HomePage
               onNavigate={handleNavigate}
@@ -555,6 +573,17 @@ export default function App() {
               onSearchChange={setDirectorySearchQuery}
             />
           )}
+
+          {currentView === 'settings' && (
+            <SettingsPage onBackToHome={() => handleNavigate('home')} />
+          )}
+
+          {currentView === 'browser' && (
+            <InSiteBrowser
+              onClose={() => handleNavigate(previousView === 'browser' ? 'home' : previousView)}
+            />
+          )}
+          </div>
         </main>
       </div>
 
@@ -578,7 +607,7 @@ export default function App() {
           </div>
           <a
             href={randomGameToast.url}
-            target="_blank"
+            target={settings.openInNewTab ? '_blank' : '_self'}
             rel="noopener noreferrer"
             className="rounded-lg bg-orange-500 hover:bg-orange-400 text-neutral-950 px-2.5 py-1 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap ml-2 cursor-pointer"
           >
@@ -587,16 +616,10 @@ export default function App() {
         </div>
       )}
 
-      {/* What's New in v1.2 Modal */}
+      {/* What's New in v1.4 Modal */}
       <WhatsNewModal
         isOpen={showWhatsNewModal}
         onClose={handleCloseWhatsNew}
-      />
-
-      {/* One-time Early Development Notice */}
-      <EarlyDevModal
-        isOpen={showEarlyDevModal}
-        onClose={handleCloseEarlyDev}
       />
 
       {/* Quick Return Link Problem Assistant Modal */}
@@ -607,5 +630,13 @@ export default function App() {
         onClose={() => setQuickReturnModal({ isOpen: false })}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <SettingsProvider>
+      <VaultApp />
+    </SettingsProvider>
   );
 }

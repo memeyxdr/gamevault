@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   Search,
   ExternalLink,
-  Trash2,
   Star,
   Globe,
   FolderOpen,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Category, GameSiteLink } from '../types';
 import { CategoryIcon } from './CategoryIcon';
+import { useSettings } from '../context/SettingsContext';
 
 interface CategoryDetailProps {
   category: Category;
@@ -30,6 +30,7 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
   onToggleFavoriteSite,
   onDeleteSite,
 }) => {
+  const { settings } = useSettings();
   const [siteSearch, setSiteSearch] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -205,14 +206,6 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
                           }`}
                         />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => onDeleteSite(site.id)}
-                        className="p-1 text-neutral-400 hover:text-rose-400 transition-colors"
-                        title="Remove entry"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
                     </div>
                   </div>
 
@@ -265,7 +258,7 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
                   </span>
                   <a
                     href={site.url}
-                    target="_blank"
+                    target={settings.openInNewTab ? '_blank' : '_self'}
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-neutral-300 hover:text-white transition-colors"
                   >

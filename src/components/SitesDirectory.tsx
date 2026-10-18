@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Category, GameSiteLink, DisplayDensity } from '../types';
 import { CategoryIcon } from './CategoryIcon';
+import { useSettings } from '../context/SettingsContext';
 
 interface SitesDirectoryProps {
   sites: GameSiteLink[];
@@ -42,30 +43,28 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
   searchQuery,
   onSearchChange,
 }) => {
+  const { settings, updateSettings, currentAccentHex } = useSettings();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'rank' | 'name' | 'domain' | 'date'>(
     onlyBestGames || onlyBestWebsites ? 'rank' : 'name'
   );
 
-  // View mode setting: "grid" (Blocks) vs "list" (List), persisted in localStorage
-  const [viewSetting, setViewSetting] = useState<DisplayDensity>(() => {
-    try {
-      const saved = localStorage.getItem('gamevault_display_mode');
-      return saved === 'list' || saved === 'grid' ? saved : 'grid';
-    } catch {
-      return 'grid';
-    }
-  });
+  // View mode setting: "grid" (Blocks) vs "list" (List), initialized from settings
+  const [viewSetting, setViewSetting] = useState<DisplayDensity>(settings.defaultView || 'grid');
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Sync if settings.defaultView changes
   useEffect(() => {
-    try {
-      localStorage.setItem('gamevault_display_mode', viewSetting);
-    } catch {
-      // storage unavailable
+    if (settings.defaultView) {
+      setViewSetting(settings.defaultView);
     }
-  }, [viewSetting]);
+  }, [settings.defaultView]);
+
+  const handleToggleViewSetting = (density: DisplayDensity) => {
+    setViewSetting(density);
+    updateSettings({ defaultView: density });
+  };
 
   const handleCopyUrl = (id: string, url: string) => {
     navigator.clipboard.writeText(url);
@@ -155,8 +154,8 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
           <div className="flex items-center rounded-lg border border-neutral-800 bg-neutral-900 p-1">
             <button
               type="button"
-              onClick={() => setViewSetting('grid')}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              onClick={() => handleToggleViewSetting('grid')}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
                 viewSetting === 'grid'
                   ? 'bg-neutral-800 text-white shadow-sm'
                   : 'text-neutral-400 hover:text-neutral-200'
@@ -167,8 +166,8 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setViewSetting('list')}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              onClick={() => handleToggleViewSetting('list')}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
                 viewSetting === 'list'
                   ? 'bg-neutral-800 text-white shadow-sm'
                   : 'text-neutral-400 hover:text-neutral-200'
@@ -247,7 +246,7 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
       {displayedSites.length > 0 ? (
         viewSetting === 'grid' ? (
           /* Blocks (Grid) View */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {displayedSites.map((site) => {
               const cat = categoryMap.get(site.categoryId);
               const isUnlockedThingy =
@@ -257,7 +256,13 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
               return (
                 <div
                   key={site.id}
-                  className="group relative flex flex-col justify-between rounded-lg border border-neutral-800 bg-neutral-900/40 p-4 transition-all hover:border-neutral-700 hover:bg-neutral-900/70"
+                  className={`group relative flex flex-col justify-between rounded-xl border p-4.5 transition-all duration-200 ${
+                    site.isBestGame
+                      ? 'border-yellow-500/40 bg-neutral-900/80 shadow-[0_0_16px_rgba(234,179,8,0.08)] hover:border-yellow-400 hover:shadow-[0_0_24px_rgba(234,179,8,0.18)]'
+                      : site.isBestWebsite
+                      ? 'border-amber-500/40 bg-neutral-900/80 shadow-[0_0_16px_rgba(245,158,11,0.08)] hover:border-amber-400 hover:shadow-[0_0_24px_rgba(245,158,11,0.18)]'
+                      : 'border-neutral-800/90 bg-neutral-900/50 hover:border-orange-500/50 hover:bg-neutral-900/90 hover:shadow-[0_4px_25px_rgba(0,0,0,0.8),0_0_20px_rgba(234,88,12,0.12)]'
+                  }`}
                 >
                   <div>
                     {/* Top Row: Icon + Trophy/Medal (next to logo) + Star Toggle */}
@@ -423,7 +428,7 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                     </span>
                     <a
                       href={site.url}
-                      target="_blank"
+                      target={settings.openInNewTab ? '_blank' : '_self'}
                       rel="noreferrer"
                       className="inline-flex items-center gap-1 font-medium text-neutral-200 hover:text-white transition-colors"
                     >
@@ -581,7 +586,7 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                     </button>
                     <a
                       href={site.url}
-                      target="_blank"
+                      target={settings.openInNewTab ? '_blank' : '_self'}
                       rel="noreferrer"
                       className="flex items-center gap-1 rounded border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs text-neutral-200 hover:bg-neutral-700 transition-colors"
                     >

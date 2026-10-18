@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { ViewMode, GameSiteLink, Category } from '../types';
 import { PumpkinIcon } from './PumpkinIcon';
+import { useSettings } from '../context/SettingsContext';
 
 interface HomePageProps {
   onNavigate: (view: ViewMode) => void;
@@ -29,6 +30,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   sites,
   onOpenWhatsNew,
 }) => {
+  const { settings } = useSettings();
   const bestGames = sites.filter((s) => s.isBestGame).sort((a, b) => (a.rank || 99) - (b.rank || 99));
   const bestWebsites = sites.filter((s) => s.isBestWebsite).sort((a, b) => (a.rank || 99) - (b.rank || 99));
   const starredSites = sites.filter((s) => s.isFavorite);
@@ -52,7 +54,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               type="button"
               onClick={onOpenWhatsNew}
               className="text-left hover:text-orange-300 transition-colors cursor-pointer flex items-center gap-2"
-              title="Click to view What's new in v1.3"
+              title="Click to view What's new in v1.4"
             >
               <span>GameVault</span> <span className="text-orange-400">HQ</span>
             </button>
@@ -64,7 +66,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 title="View changelog"
               >
                 <PumpkinIcon className="h-3.5 w-3.5" />
-                <span>v1.3 Halloween</span>
+                <span>v1.4 Redesign</span>
               </button>
             )}
           </h1>
@@ -101,10 +103,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="inline-flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800/80 px-4 py-2.5 text-xs sm:text-sm font-semibold text-neutral-200 hover:border-orange-500/40 hover:text-orange-300 transition-all cursor-pointer"
               >
                 <PumpkinIcon className="h-4 w-4" />
-                <span>What's new in v1.3</span>
-                <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.5 text-[10px] font-mono font-medium text-orange-300">
-                  Major Release
-                </span>
+                <span>What's new in v1.4</span>
               </button>
             )}
           </div>
@@ -288,7 +287,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <a
               key={site.id}
               href={site.url}
-              target="_blank"
+              target={settings.openInNewTab ? '_blank' : '_self'}
               rel="noopener noreferrer"
               className="group flex flex-col justify-between rounded-xl border border-neutral-800 bg-neutral-900/70 p-4 hover:border-orange-500/40 hover:bg-neutral-900 transition-all hover:shadow-md"
             >
