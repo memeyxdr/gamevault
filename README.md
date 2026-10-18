@@ -1,20 +1,17 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# GameVault
 
-# Run and deploy your AI Studio app
+GameVault is a React app built with Vite. User settings and edits are stored in browser localStorage. GitHub Pages deployment is configured in `.github/workflows/deploy.yml`.
 
-This contains everything you need to run your app locally.
+## Run locally
 
-View your app in AI Studio: https://ai.studio/apps/ed72552d-c865-4faa-ae82-fbaa0b95b644
+Prerequisite: Node.js 22 or newer.
 
-## Run Locally
+1. Install dependencies with `npm install`.
+2. Start the app and its local API with `npm run dev`.
+3. Build the static frontend with `npm run build`; Vite writes files to `dist/`.
 
-**Prerequisites:**  Node.js
+The optional Gemini server reads `GEMINI_API_KEY` from the environment. Put local credentials in an untracked `.env.local` file. Never commit API keys or other secrets. GitHub Pages hosts the static frontend; the Express API requires a separate server deployment.
 
+## AI Studio
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+The original AI Studio project: https://ai.studio/apps/ed72552d-c865-4faa-ae82-fbaa0b95b644
