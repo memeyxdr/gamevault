@@ -229,7 +229,7 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
                     <div className="mt-2.5 rounded border border-amber-900/80 bg-amber-950/40 p-2 space-y-1">
                       <div className="flex items-center gap-1.5 font-bold text-amber-300 font-mono text-xs">
                         <KeyRound className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                        <span>Password: funni</span>
+                        <span>Password required; contact the site owner.</span>
                       </div>
                       <div className="text-[11px] font-medium text-amber-200/90 leading-snug">
                         do not add web URL when entering password
