@@ -1,17 +1,13 @@
-# GameVault
+# GameVault 🎮
 
-GameVault is a React app built with Vite. User settings and edits are stored in browser localStorage. GitHub Pages deployment is configured in `.github/workflows/deploy.yml`.
+GameVault is a browser gaming hub that brings together gaming websites and direct game links in one place. Built with the help of OpenAI Codex, it's a project focused on making browser gaming easier and more accessible.
 
-## Run locally
+## Features
+- Curated gaming websites
+- Direct browser game links
+- Simple, easy-to-use interface
+- Regular updates and improvements
 
-Prerequisite: Node.js 22 or newer.
+## About
+GameVault is an independent project developed with help from AI tools, including OpenAI Codex.
 
-1. Install dependencies with `npm install`.
-2. Start the app and its local API with `npm run dev`.
-3. Build the static frontend with `npm run build`; Vite writes files to `dist/`.
-
-The optional Gemini server reads `GEMINI_API_KEY` from the environment. Put local credentials in an untracked `.env.local` file. Never commit API keys or other secrets. GitHub Pages hosts the static frontend; the Express API requires a separate server deployment.
-
-## AI Studio
-
-The original AI Studio project: https://ai.studio/apps/ed72552d-c865-4faa-ae82-fbaa0b95b644
