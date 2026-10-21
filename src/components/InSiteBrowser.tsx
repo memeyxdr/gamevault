@@ -136,7 +136,6 @@ export const InSiteBrowser: React.FC<InSiteBrowserProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [iframeKey, setIframeKey] = useState<number>(1);
   const [showLoadTimeoutWarning, setShowLoadTimeoutWarning] = useState<boolean>(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Synchronize address bar when activeUrl changes
@@ -144,15 +143,10 @@ export const InSiteBrowser: React.FC<InSiteBrowserProps> = ({
     setInputAddress(getDisplayFromUrl(activeUrl));
     setIsLoading(true);
     setShowLoadTimeoutWarning(false);
-    if (iframeRef.current) delete iframeRef.current.dataset.loaded;
-
-    // Set a timeout to display a helpful embed fallback if the target site blocks framing
+    // An iframe load event only means the outer document navigated. It does not
+    // guarantee that a cross-origin proxy rendered its own nested page.
     const timer = setTimeout(() => {
-      // A cross-origin iframe cannot be inspected for blank content or provider errors.
-      // Only offer the fallback if it has not fired a load event by this point.
-      if (iframeRef.current && !iframeRef.current.dataset.loaded) {
-        setShowLoadTimeoutWarning(true);
-      }
+      setShowLoadTimeoutWarning(true);
     }, 7000);
 
     return () => clearTimeout(timer);
@@ -195,7 +189,6 @@ export const InSiteBrowser: React.FC<InSiteBrowserProps> = ({
   const handleReload = () => {
     setIsLoading(true);
     setShowLoadTimeoutWarning(false);
-    if (iframeRef.current) delete iframeRef.current.dataset.loaded;
     setIframeKey((prev) => prev + 1);
   };
 
@@ -206,7 +199,6 @@ export const InSiteBrowser: React.FC<InSiteBrowserProps> = ({
 
   // Iframe load listener
   const handleIframeLoad = () => {
-    if (iframeRef.current) iframeRef.current.dataset.loaded = 'true';
     setIsLoading(false);
     setShowLoadTimeoutWarning(false);
   };
@@ -350,10 +342,10 @@ export const InSiteBrowser: React.FC<InSiteBrowserProps> = ({
               <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="font-semibold text-white">
-                  Taking longer than usual or page blank?
+                  Can't see the page inside?
                 </p>
                 <p className="text-neutral-400 text-[11px] leading-relaxed">
-                  Some websites enforce security policies (<code className="text-neutral-300">X-Frame-Options</code>) that block in-iframe embedding. You can launch it directly in a new tab.
+                  A page can finish its outer load while its embedded content is still blocked. Open it in a full browser tab to let the proxy and Cloudflare load without nested-frame restrictions.
                 </p>
               </div>
             </div>
@@ -383,11 +375,10 @@ export const InSiteBrowser: React.FC<InSiteBrowserProps> = ({
         {/* The Sandboxed Browser Iframe */}
         <iframe
           key={iframeKey}
-          ref={iframeRef}
           src={activeUrl}
           title="In-Site GameVault Browser"
           onLoad={handleIframeLoad}
-          className="w-full h-full border-0 bg-white"
+          className="block w-full flex-1 min-h-0 border-0 bg-white"
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
           referrerPolicy="no-referrer-when-downgrade"
