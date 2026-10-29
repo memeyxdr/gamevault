@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
-  Sparkles,
   ArrowRight,
-  Menu,
-  Globe,
-  Layers,
-  AlertTriangle,
-  ShieldCheck,
-  CheckCircle2,
-  Settings,
+  Gamepad2,
+  Accessibility,
+  HardDrive,
   Compass,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface WhatsNewModalProps {
@@ -18,7 +14,8 @@ interface WhatsNewModalProps {
   onClose: () => void;
 }
 
-export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_4_redesign_modal';
+// Bumped when the notes change so the updated changelog is shown once more
+export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_5_direct_games';
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -92,11 +89,11 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <div className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-2.5 py-0.5 text-xs font-mono font-medium text-orange-400">
-                <span>v1.4 Layout Redesign</span>
+                <span>v1.5</span>
               </div>
             </div>
             <h2 id="whats-new-title" className="text-xl sm:text-2xl font-extrabold tracking-tight text-white font-mono flex items-center gap-2">
-              <span>What's new in v1.4</span>
+              <span>What's new in v1.5</span>
             </h2>
           </div>
 
@@ -118,167 +115,103 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               Update Highlights
             </div>
 
-            {/* Highlight: Settings Feature */}
+            {/* Highlight: Direct Games */}
             <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
-                  <Settings className="h-4.5 w-4.5" />
+                  <Gamepad2 className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      New: Settings
-                    </h3>
+                    <h3 className="text-xs sm:text-sm font-semibold text-white">Direct Games</h3>
                     <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
-                      Feature
+                      New
                     </span>
                   </div>
                   <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
-                    <li>Added a dedicated Settings section.</li>
-                    <li>Added Dark, Light, and System theme options.</li>
-                    <li>Added preset and custom accent colors.</li>
-                    <li>Added Performance Mode for reduced visual effects.</li>
-                    <li>Added Grid and List browsing preferences.</li>
-                    <li>Added an option to open external links in a new tab.</li>
-                    <li>Added Reset Settings to Default.</li>
-                    <li>Added Reset Local Data to restore the first-visit experience by clearing supported GameVault-specific local data.</li>
-                    <li>Added persistent preferences so supported settings remain saved after refresh.</li>
+                    <li>Direct Games is no longer a placeholder — eight titles now play right inside GameVault: n-gon, Drive Mad, Dr1v3n Wild, Slope, Bit Planes, PolyTrack, Drift Boss, and Basket Hoop.</li>
+                    <li>Games load only when you pick one. The page opens as a tile grid, so nothing downloads or starts until you press Play.</li>
+                    <li>Picking a tile opens a full-view player with Back to Direct Games, Restart, and New tab. The frame fills the whole view space — no padding, no borders, no dead space around it.</li>
+                    <li>More games are on the way, and there is a suggest-a-game link at the bottom of the page that opens the same form as Settings.</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* Highlight: In-Site Browser Feature */}
+            {/* Highlight: Accessibility & Motion */}
             <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
+                  <Accessibility className="h-4.5 w-4.5" />
+                </div>
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-white">
+                      Accessibility & Motion
+                    </h3>
+                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
+                      Settings
+                    </span>
+                  </div>
+                  <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
+                    <li>Reduce Motion stops animated toasts, hover glides, and smooth scrolling — including a hint when your OS already asks for it.</li>
+                    <li>Compact Navigation Rail slims the icon rail so wide directories get more room.</li>
+                    <li>Show Labels Under Rail Icons prints a tiny name under every rail icon, so you never have to hover to know what it does.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Highlight: Storage & Diagnostics */}
+            <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
+                  <HardDrive className="h-4.5 w-4.5" />
+                </div>
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-white">
+                      Storage & Diagnostics
+                    </h3>
+                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
+                      Settings
+                    </span>
+                  </div>
+                  <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
+                    <li>See exactly how much GameVault keeps on this device, plus your site, category, and starred counts.</li>
+                    <li>A readout of every active setting, and a Copy Diagnostics button for bug reports.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Heads Up Section */}
+          <div className="space-y-2">
+            <div className="text-xs font-mono font-semibold uppercase tracking-wider text-amber-400">
+              Heads Up
+            </div>
+
+            <div className="rounded-xl border border-amber-500/40 bg-neutral-950/80 p-3.5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/15 text-amber-400">
                   <Compass className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      New: In-Site Browser
+                      In-Site Browser is down
                     </h3>
-                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
-                      Feature
+                    <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 border border-amber-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-amber-300">
+                      <AlertTriangle className="h-3 w-3" />
+                      Fixing
                     </span>
                   </div>
                   <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
-                    <li>Added integrated web browser directly inside the main viewing space.</li>
-                    <li>Full AnyProxy gateway routing with DuckDuckGo search integration.</li>
-                    <li>Navigation controls with Back history, Page Reload, and Go button.</li>
-                    <li>Sandboxed iframe security with fallback pop-out for restricted websites.</li>
+                    <li>The built-in browser is not working anymore, and it is actively being fixed.</li>
+                    <li>Every button that used to open it now shows a short notice right in the page area — no pop-ups.</li>
+                    <li>Directory links still open normally in your own browser.</li>
                   </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Highlight: Left Navigation Icon Rail */}
-            <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
-                  <Menu className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      Left Icon Rail Navigation
-                    </h3>
-                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
-                      v1.4 Redesign
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    Replaced the bulky text sidebar with a sleek, ergonomic vertical icon rail. Features comfortable button sizes with floating hover tooltips, freeing up massive screen space for the games and proxy directory.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Highlight: One-Icon Categories Shortcut */}
-            <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
-                  <Layers className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      One-Icon Categories Space
-                    </h3>
-                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
-                      Quick Access
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    A single intuitive Categories icon on the left rail instantly opens the full Categories space, making it fast and effortless to explore portals, unblockers, GitHub pages, and media utilities.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Highlight: Bottom Error Reporting Button */}
-            <div className="rounded-xl border border-red-500/30 bg-neutral-950/80 p-3.5 transition-colors hover:border-red-500/50 shadow-sm shadow-red-500/5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/15 text-red-400">
-                  <AlertTriangle className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      Rail Bottom Error Report
-                    </h3>
-                    <span className="rounded bg-red-500/20 border border-red-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-red-300">
-                      Direct Form
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    Pinned right at the bottom of the navigation rail for immediate 1-click access to report blocked or malfunctioning links directly to GameVault maintainers.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Highlight: New websites indexed/added */}
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3.5 transition-colors hover:border-neutral-700">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                  <Globe className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-neutral-100">
-                      New websites indexed/added
-                    </h3>
-                    <span className="rounded bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-emerald-300">
-                      Directory
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    Expanded the catalog with newly indexed working proxies and game portals, adding collections with over +1,500 games and updating the top leaderboard rankings.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Highlight: Protected Directory Library */}
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3.5 transition-colors hover:border-neutral-700">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-400">
-                  <ShieldCheck className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-neutral-100">
-                      Protected Directory Library
-                    </h3>
-                    <span className="rounded bg-sky-500/15 border border-sky-500/30 px-1.5 py-0.2 text-[10px] font-mono font-medium text-sky-300">
-                      Catalog Integrity
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    Removed accidental delete buttons and trash icons so that the community-curated list of links and proxies remains secure and permanent for everyone.
-                  </p>
                 </div>
               </div>
             </div>
@@ -294,56 +227,32 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">Accent color now follows your selection</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Orange-based text, buttons, borders, gradients, and translucent highlights now use the selected accent color.</div>
+                  <div className="text-xs font-semibold text-neutral-200">Version labels now read v1.5</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">Every remaining v1.4 tag was updated to v1.5 — hero version pill, changelog buttons, and the sidebar shortcut.</div>
                 </div>
               </div>
 
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">More ways to open a site</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Added an In-Site Browser button beside Open Link in directory cards, lists, and category pages, plus the quick-return link dialog.</div>
+                  <div className="text-xs font-semibold text-neutral-200">Active games use the entire view space</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">While a game is running, the main area drops its padding and width cap, so the frame sits flush against the rail, the navbar, and the window edges. Leaving the game restores the normal layout.</div>
                 </div>
               </div>
 
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">Directory catalog cleanup</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Removed SZVY Central v2 (Movies) from the catalog and updated the Best Websites highlight to show ranks #1–#2.</div>
+                  <div className="text-xs font-semibold text-neutral-200">Home hero dropped the “HQ” tag</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">The heading now reads just GameVault, and it still opens this changelog when clicked.</div>
                 </div>
               </div>
 
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">Theme-matched hover and light-mode cards</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Directory cards now keep a dark hover surface in dark mode, and Top Rated Games cards use light surfaces in light mode.</div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
-                <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold text-neutral-200">Removed site deletion trash icons</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Removed trash icons across directory and category views to prevent accidental site deletion.</div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
-                <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold text-neutral-200">Consolidated navigation into slim rail</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Eliminated wide drawer layout in favor of a slim icon rail with tooltips, giving more breathing room to games.</div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
-                <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold text-neutral-200">Cleaned release notes from older v1.3 items</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Updated release notes and changelog exclusively for the v1.4 redesign.</div>
+                  <div className="text-xs font-semibold text-neutral-200">Rail shortcuts reordered</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">Direct Games moved up next to Categories, with Stars and the browser closing out the list. Rail icons still keep their full size and scroll instead of squashing together.</div>
                 </div>
               </div>
             </div>

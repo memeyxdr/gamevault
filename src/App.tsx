@@ -19,7 +19,8 @@ import { WhatsNewModal, WHATS_NEW_STORAGE_KEY } from './components/WhatsNewModal
 import { QuickReturnFeedbackModal } from './components/QuickReturnFeedbackModal';
 import { DiceIcon } from './components/DiceIcon';
 import { SettingsPage } from './components/SettingsPage';
-import { InSiteBrowser, resolveBrowserDestination } from './components/InSiteBrowser';
+import { BrowserUnavailableNotice } from './components/BrowserUnavailableNotice';
+import { DirectGamesPage } from './components/DirectGamesPage';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 
 const STORAGE_KEYS = {
@@ -128,11 +129,12 @@ function VaultApp() {
   // Navigation & View States - Default to Home page
   const [currentView, setCurrentView] = useState<ViewMode>('home');
   const [previousView, setPreviousView] = useState<ViewMode>('home');
-  const [inSiteBrowserInitialUrl, setInSiteBrowserInitialUrl] = useState<string | undefined>();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [sidebarSearchQuery, setSidebarSearchQuery] = useState('');
   const [directorySearchQuery, setDirectorySearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // True while a Direct Games title is running: the main area drops its padding so the game fills it edge to edge
+  const [isDirectGamePlaying, setIsDirectGamePlaying] = useState(false);
 
   // Quick return detection: if a user returns to GameVault within 5 seconds after opening a link
   const lastOpenedLinkRef = React.useRef<{
@@ -293,9 +295,10 @@ function VaultApp() {
     }
   };
 
-  const handleOpenInSiteBrowser = (url: string) => {
+  // The in-site browser is currently disabled, so every request to open it
+  // lands on the "temporarily unavailable" notice in the main view space.
+  const handleOpenInSiteBrowser = (_url: string) => {
     setPreviousView(currentView === 'browser' ? previousView : currentView);
-    setInSiteBrowserInitialUrl(resolveBrowserDestination(url).url);
     setQuickReturnModal({ isOpen: false });
     setCurrentView('browser');
   };
@@ -463,7 +466,7 @@ function VaultApp() {
       />
 
       <div className="flex flex-1 overflow-hidden w-full">
-        {/* Left Icon Rail Navigation (v1.4 Redesign) */}
+        {/* Left Icon Rail Navigation (v1.5 Redesign) */}
         <NavRail
           currentView={currentView}
           onNavigate={handleNavigate}
@@ -478,13 +481,13 @@ function VaultApp() {
 
         {/* Main Content Area / Expansive Main View Space */}
         <main
-          className={`flex-1 min-w-0 focus:outline-none ${
-            currentView === 'browser'
-              ? 'p-0 overflow-hidden flex flex-col'
-              : 'p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth'
+          className={`flex-1 min-w-0 focus:outline-none scroll-smooth ${
+            isDirectGamePlaying
+              ? 'p-0 overflow-hidden'
+              : 'p-4 sm:p-6 lg:p-8 overflow-y-auto'
           }`}
         >
-          <div className={`w-full ${currentView === 'browser' ? 'h-full flex-1 flex flex-col min-h-0' : 'max-w-7xl mx-auto'}`}>
+          <div className={isDirectGamePlaying ? 'h-full w-full' : 'w-full max-w-7xl mx-auto'}>
           {currentView === 'home' && (
             <HomePage
               onNavigate={handleNavigate}
@@ -582,14 +585,27 @@ function VaultApp() {
             />
           )}
 
+          {currentView === 'direct-games' && (
+            <DirectGamesPage
+              onBrowseSites={() => handleNavigate('all-sites')}
+              onPlayingChange={setIsDirectGamePlaying}
+            />
+          )}
+
           {currentView === 'settings' && (
-            <SettingsPage onBackToHome={() => handleNavigate('home')} />
+            <SettingsPage
+              onBackToHome={() => handleNavigate('home')}
+              siteCount={sites.length}
+              categoryCount={categories.length}
+              favoriteCount={starredSiteIds.length}
+            />
           )}
 
           {currentView === 'browser' && (
-            <InSiteBrowser
-              initialUrl={inSiteBrowserInitialUrl}
-              onClose={() => handleNavigate(previousView === 'browser' ? 'home' : previousView)}
+            <BrowserUnavailableNotice
+              onBackToSites={() =>
+                handleNavigate(previousView === 'browser' ? 'all-sites' : previousView)
+              }
             />
           )}
           </div>
@@ -625,7 +641,7 @@ function VaultApp() {
         </div>
       )}
 
-      {/* What's New in v1.4 Modal */}
+      {/* What's New in v1.5 Modal */}
       <WhatsNewModal
         isOpen={showWhatsNewModal}
         onClose={handleCloseWhatsNew}

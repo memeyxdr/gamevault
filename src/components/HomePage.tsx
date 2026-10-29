@@ -53,9 +53,9 @@ export const HomePage: React.FC<HomePageProps> = ({
               type="button"
               onClick={onOpenWhatsNew}
               className="text-left hover:text-orange-300 transition-colors cursor-pointer flex items-center gap-2"
-              title="Click to view What's new in v1.4"
+              title="Click to view What's new in v1.5"
             >
-              <span>GameVault</span> <span className="text-orange-400">HQ</span>
+              <span>GameVault</span>
             </button>
             {onOpenWhatsNew && (
               <button
@@ -64,7 +64,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="inline-flex items-center gap-1.5 text-xs font-mono font-medium rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-orange-400 hover:bg-orange-500/20 transition-all cursor-pointer"
                 title="View changelog"
               >
-                <span>v1.4 Redesign</span>
+                <span>v1.5 Redesign</span>
               </button>
             )}
           </h1>
@@ -100,7 +100,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 onClick={onOpenWhatsNew}
                 className="inline-flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800/80 px-4 py-2.5 text-xs sm:text-sm font-semibold text-neutral-200 hover:border-orange-500/40 hover:text-orange-300 transition-all cursor-pointer"
               >
-                <span>What's new in v1.4</span>
+                <span>What's new in v1.5</span>
               </button>
             )}
           </div>

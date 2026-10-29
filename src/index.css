@@ -184,6 +184,28 @@ html[data-theme="dark"] .light-directory-card:hover {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15) !important;
 }
 
+/* Accessibility: Reduce Motion — suppress animations, transitions and smooth scrolling */
+html.reduce-motion {
+  scroll-behavior: auto !important;
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduce-motion .animate-pulse,
+.reduce-motion .blur-3xl,
+.reduce-motion .blur-2xl {
+  animation: none !important;
+}
+
 /* Light Mode Overrides */
 html.light,
 html[data-theme="light"] {

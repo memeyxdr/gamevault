@@ -18,20 +18,31 @@ import {
   X,
   Sparkles,
   Lightbulb,
+  Accessibility,
+  HardDrive,
+  Copy,
 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { ACCENT_PRESETS, AccentPreset, ThemeMode, DisplayDensity } from '../types';
 
 const ERROR_REPORT_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSel_qnMs80ZZIFoIgV-VqPEvOd6ZDZjtbr-32cb9KHXrVuCqw/viewform?usp=dialog';
-const GAME_SUGGESTION_URL =
+export const GAME_SUGGESTION_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSdhulN_Qrg7223ug-iI4J3KmN5nJSepxTMDyFNSov4IE4xH8A/viewform?usp=dialog';
+const APP_VERSION = 'v1.5';
 
 interface SettingsPageProps {
   onBackToHome?: () => void;
+  siteCount?: number;
+  categoryCount?: number;
+  favoriteCount?: number;
 }
 
-export const SettingsPage: React.FC<SettingsPageProps> = () => {
+export const SettingsPage: React.FC<SettingsPageProps> = ({
+  siteCount = 0,
+  categoryCount = 0,
+  favoriteCount = 0,
+}) => {
   const {
     settings,
     updateSettings,
@@ -39,6 +50,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = () => {
     resetAllData,
     resolvedTheme,
     currentAccentHex,
+    accentRgb,
     accentContrast,
   } = useSettings();
 
@@ -54,6 +66,40 @@ export const SettingsPage: React.FC<SettingsPageProps> = () => {
   useEffect(() => {
     setCustomHexInput(settings.customAccentColor || '#f97316');
   }, [settings.customAccentColor]);
+
+  // Accessibility: mirror the OS-level reduced-motion preference (shown as a hint)
+  const [systemPrefersReducedMotion, setSystemPrefersReducedMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setSystemPrefersReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersReducedMotion(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Storage footprint of everything GameVault keeps on this device
+  const [storageStats, setStorageStats] = useState<{ bytes: number; keys: number }>({
+    bytes: 0,
+    keys: 0,
+  });
+  useEffect(() => {
+    try {
+      const encoder = new TextEncoder();
+      let bytes = 0;
+      let keys = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('gamevault_')) continue;
+        const value = localStorage.getItem(key) ?? '';
+        bytes += encoder.encode(key).length + encoder.encode(value).length;
+        keys += 1;
+      }
+      setStorageStats({ bytes, keys });
+    } catch {
+      setStorageStats({ bytes: 0, keys: 0 });
+    }
+  }, []);
 
   const triggerToast = (msg: string) => {
     setResetSuccessToast(msg);
@@ -99,6 +145,51 @@ export const SettingsPage: React.FC<SettingsPageProps> = () => {
       resetAllData();
       window.location.reload();
     }, 600);
+  };
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+  const formattedStorage = formatBytes(storageStats.bytes);
+  const accentLabel =
+    ACCENT_PRESETS.find((preset) => preset.id === settings.accentPreset)?.name ?? 'Custom';
+  const themeLabel =
+    settings.theme === 'system'
+      ? `System (${resolvedTheme === 'dark' ? 'Dark' : 'Light'})`
+      : settings.theme === 'dark'
+        ? 'Dark'
+        : 'Light';
+
+  const buildDiagnostics = () =>
+    [
+      `GameVault ${APP_VERSION} — Diagnostics`,
+      `Generated: ${new Date().toISOString()}`,
+      `Browser: ${navigator.userAgent}`,
+      `Viewport: ${window.innerWidth}x${window.innerHeight}`,
+      '',
+      `Theme: ${themeLabel}`,
+      `Accent: ${accentLabel} (${currentAccentHex})`,
+      `Performance Mode: ${settings.performanceMode ? 'on' : 'off'}`,
+      `Reduce Motion: ${settings.reduceMotion ? 'on' : 'off'}`,              `Compact Rail: ${settings.compactRail ? 'on' : 'off'}`,
+              `Rail Labels: ${settings.showRailLabels ? 'on' : 'off'}`,
+
+      `Default Layout: ${settings.defaultView === 'grid' ? 'blocks (grid)' : 'compact (list)'}`,
+      `Links Open In: ${settings.openInNewTab ? 'new tab' : 'same tab'}`,
+      '',
+      `Sites: ${siteCount} | Categories: ${categoryCount} | Starred: ${favoriteCount}`,
+      `Local storage: ${formattedStorage} across ${storageStats.keys} keys`,
+    ].join('\n');
+
+  const handleCopyDiagnostics = async () => {
+    const text = buildDiagnostics();
+    try {
+      await navigator.clipboard.writeText(text);
+      triggerToast('Diagnostics copied to clipboard');
+    } catch {
+      triggerToast('Clipboard blocked by the browser');
+    }
   };
 
   return (
@@ -475,7 +566,123 @@ export const SettingsPage: React.FC<SettingsPageProps> = () => {
         </div>
       </section>
 
-      {/* 4. Browsing Section */}
+      {/* 4. Accessibility & Motion Section */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Accessibility className="h-4 w-4" style={{ color: currentAccentHex }} />
+          <h2 className="text-sm sm:text-base font-semibold text-white font-mono uppercase tracking-wider">
+            Accessibility & Motion
+          </h2>
+        </div>
+
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 sm:p-6 space-y-6 shadow-sm">
+          {/* Reduce Motion */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1 max-w-xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs sm:text-sm font-semibold text-neutral-200">
+                  Reduce Motion
+                </span>
+                {systemPrefersReducedMotion && (
+                  <span className="rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.2 text-[10px] font-mono font-medium text-sky-400">
+                    Your system asks for this
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Stops animated toasts, hover glides, and smooth scrolling so the interface holds still while you browse. Helpful for motion sensitivity, and it is free performance on top.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.reduceMotion}
+              aria-label="Reduce Motion"
+              onClick={() => updateSettings({ reduceMotion: !settings.reduceMotion })}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                settings.reduceMotion ? 'bg-orange-500' : 'bg-neutral-800'
+              }`}
+              style={settings.reduceMotion ? { backgroundColor: currentAccentHex } : {}}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  settings.reduceMotion ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="h-px bg-neutral-800/80" />
+
+          {/* Compact Navigation Rail */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1 max-w-xl">
+              <span className="text-xs sm:text-sm font-semibold text-neutral-200 block">
+                Compact Navigation Rail
+              </span>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Slims the left icon rail so wide directories and the category grid get a little more room on small laptop screens. Icons keep their full click target.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.compactRail}
+              aria-label="Compact Navigation Rail"
+              onClick={() => updateSettings({ compactRail: !settings.compactRail })}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                settings.compactRail ? 'bg-orange-500' : 'bg-neutral-800'
+              }`}
+              style={settings.compactRail ? { backgroundColor: currentAccentHex } : {}}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  settings.compactRail ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="h-px bg-neutral-800/80" />
+
+          {/* Rail Labels */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1 max-w-xl">
+              <span className="text-xs sm:text-sm font-semibold text-neutral-200 block">
+                Show Labels Under Rail Icons
+              </span>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Prints a tiny name under every icon in the left rail — Home, Categories, Direct, All Sites, Best Games, Websites, Starred, Browser, Search and Settings — so you never have to hover to work out what an icon does.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.showRailLabels}
+              aria-label="Show Labels Under Rail Icons"
+              onClick={() => updateSettings({ showRailLabels: !settings.showRailLabels })}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                settings.showRailLabels ? 'bg-orange-500' : 'bg-neutral-800'
+              }`}
+              style={settings.showRailLabels ? { backgroundColor: currentAccentHex } : {}}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  settings.showRailLabels ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Browsing Section */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <LayoutGrid className="h-4 w-4" style={{ color: currentAccentHex }} />
@@ -590,7 +797,83 @@ export const SettingsPage: React.FC<SettingsPageProps> = () => {
         </div>
       </section>
 
-      {/* 5. Privacy and Local Data Section */}
+      {/* 6. Storage & Diagnostics Section */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <HardDrive className="h-4 w-4" style={{ color: currentAccentHex }} />
+          <h2 className="text-sm sm:text-base font-semibold text-white font-mono uppercase tracking-wider">
+            Storage & Diagnostics
+          </h2>
+        </div>
+
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 sm:p-6 space-y-5 shadow-sm">
+          {/* Stat tiles */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label: 'Local Storage', value: formattedStorage, hint: `${storageStats.keys} keys` },
+              { label: 'Sites', value: String(siteCount), hint: 'In directory' },
+              { label: 'Categories', value: String(categoryCount), hint: 'Groupings' },
+              { label: 'Starred', value: String(favoriteCount), hint: 'Bookmarks' },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3.5"
+              >
+                <div className="text-[11px] text-neutral-400">{stat.label}</div>
+                <div className="mt-1 font-mono text-lg font-semibold tabular-nums text-white">
+                  {stat.value}
+                </div>
+                <div className="text-[10px] text-neutral-500">{stat.hint}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Configuration readout */}
+          <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 divide-y divide-neutral-800/80 text-xs">
+            {[
+              { label: 'Version', value: APP_VERSION },
+              { label: 'Theme', value: themeLabel },
+              { label: 'Accent', value: `${accentLabel} (${currentAccentHex})` },
+              { label: 'Performance Mode', value: settings.performanceMode ? 'On' : 'Off' },
+              { label: 'Reduce Motion', value: settings.reduceMotion ? 'On' : 'Off' },
+              { label: 'Compact Rail', value: settings.compactRail ? 'On' : 'Off' },
+              { label: 'Rail Labels', value: settings.showRailLabels ? 'On' : 'Off' },
+              {
+                label: 'Default Layout',
+                value: settings.defaultView === 'grid' ? 'Blocks (Grid)' : 'Compact (List)',
+              },
+              { label: 'Links Open In', value: settings.openInNewTab ? 'New tab' : 'Same tab' },
+            ].map((row) => (
+              <div
+                key={row.label}
+                className="flex items-center justify-between gap-3 px-3.5 py-2.5"
+              >
+                <span className="text-neutral-400">{row.label}</span>
+                <span className="font-mono text-[11px] text-neutral-200 truncate">{row.value}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p className="text-[11px] text-neutral-400 leading-normal max-w-md">
+              Diagnostics contain no links or personal data — just the settings above — so they are
+              safe to paste into a bug report.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleCopyDiagnostics}
+              className="inline-flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-950 hover:bg-neutral-800 hover:border-neutral-700 px-4 py-2.5 text-xs font-semibold text-neutral-200 transition-all cursor-pointer shrink-0 active:scale-95"
+              style={{ borderColor: `rgba(${accentRgb}, 0.35)` }}
+            >
+              <Copy className="h-4 w-4" style={{ color: currentAccentHex }} />
+              <span>Copy Diagnostics</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Privacy and Local Data Section */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <Trash2 className="h-4 w-4 text-red-400" />
@@ -663,7 +946,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = () => {
             </div>
 
             <p className="text-xs text-neutral-300 leading-relaxed bg-neutral-950/60 p-3.5 rounded-xl border border-neutral-800">
-              This will restore your theme to <strong>Dark</strong>, accent color to <strong>Pumpkin Orange</strong>, disable Performance Mode, and reset browsing view to <strong>Blocks</strong>. Your starred sites will not be touched.
+              This will restore your theme to <strong>Dark</strong>, accent color to <strong>Pumpkin Orange</strong>, disable Performance Mode, reset browsing view to <strong>Blocks</strong>, turn off Reduce Motion, hide the rail labels, and restore the standard rail width. Your starred sites will not be touched.
             </p>
 
             <div className="flex items-center justify-end gap-2.5 pt-2">

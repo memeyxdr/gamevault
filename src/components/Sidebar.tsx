@@ -536,7 +536,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-orange-400 group-hover:rotate-12 transition-transform" />
-                <span>v1.4 Release Notes</span>
+                <span>v1.5 Release Notes</span>
               </div>
               <span className="rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-mono text-orange-300 border border-orange-500/30">
                 New

@@ -32,6 +32,7 @@ export type ViewMode =
   | 'all-sites'
   | 'best-games'
   | 'best-websites'
+  | 'direct-games'
   | 'favorites'
   | 'category-detail'
   | 'ai-chat'
@@ -50,6 +51,9 @@ export interface GameVaultSettings {
   performanceMode: boolean;
   defaultView: DisplayDensity;
   openInNewTab: boolean;
+  reduceMotion: boolean;
+  compactRail: boolean;
+  showRailLabels: boolean;
 }
 
 export const ACCENT_PRESETS: { id: AccentPreset; name: string; hex: string }[] = [
@@ -68,6 +72,9 @@ export const DEFAULT_SETTINGS: GameVaultSettings = {
   performanceMode: false,
   defaultView: 'grid',
   openInNewTab: true,
+  reduceMotion: false,
+  compactRail: false,
+  showRailLabels: false,
 };
 
 export interface ChatMessage {

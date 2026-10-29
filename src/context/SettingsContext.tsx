@@ -140,7 +140,21 @@ export const SettingsProvider: React.FC<{
     } else {
       root.classList.remove('performance-mode');
     }
-  }, [resolvedTheme, currentAccentHex, accentRgb, accentContrast, settings.performanceMode]);
+
+    // 4. Accessibility: Reduce Motion
+    if (settings.reduceMotion) {
+      root.classList.add('reduce-motion');
+    } else {
+      root.classList.remove('reduce-motion');
+    }
+  }, [
+    resolvedTheme,
+    currentAccentHex,
+    accentRgb,
+    accentContrast,
+    settings.performanceMode,
+    settings.reduceMotion,
+  ]);
 
   // Persist to localStorage
   const updateSettings = useCallback((partial: Partial<GameVaultSettings>) => {
