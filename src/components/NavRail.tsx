@@ -106,7 +106,7 @@ export const NavRail: React.FC<NavRailProps> = ({
       icon: Gamepad2,
       isActive: currentView === 'direct-games',
       count: null,
-      description: 'Playable games inside GameVault (coming soon)',
+      description: 'Playable games inside GameVault',
     },
     {
       id: 'all-sites' as ViewMode,

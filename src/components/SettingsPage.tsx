@@ -29,7 +29,7 @@ const ERROR_REPORT_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSel_qnMs80ZZIFoIgV-VqPEvOd6ZDZjtbr-32cb9KHXrVuCqw/viewform?usp=dialog';
 export const GAME_SUGGESTION_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSdhulN_Qrg7223ug-iI4J3KmN5nJSepxTMDyFNSov4IE4xH8A/viewform?usp=dialog';
-const APP_VERSION = 'v1.5';
+const APP_VERSION = 'v1.5.1';
 
 interface SettingsPageProps {
   onBackToHome?: () => void;
@@ -910,6 +910,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           </div>
         </div>
       </section>
+
+      {/* Version label */}
+      <p className="pt-2 pb-1 text-center text-[10px] font-mono text-neutral-500">
+        version {APP_VERSION}
+      </p>
 
       {/* Confirmation Modal: Reset Settings to Default */}
       {showResetSettingsModal && (

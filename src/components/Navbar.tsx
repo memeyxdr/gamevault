@@ -48,11 +48,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={onOpenWhatsNew}
                 className="text-left font-semibold text-base sm:text-lg tracking-tight text-neutral-100 transition-colors hover:text-orange-200 flex items-center gap-1.5 sm:gap-2 group cursor-pointer"
-                title="Click to view What's new in v1.5"
+                title="Click to view What's new in v1.5.1"
               >
                 <span className="whitespace-nowrap">GameVault</span>
                 <span className="rounded-full border border-orange-500/50 bg-orange-500/15 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-medium text-orange-400 group-hover:bg-orange-500/25 group-hover:border-orange-500/70 transition-colors whitespace-nowrap">
-                  v1.5
+                  v1.5.1
                 </span>
               </button>
 

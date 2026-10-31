@@ -15,7 +15,7 @@ interface WhatsNewModalProps {
 }
 
 // Bumped when the notes change so the updated changelog is shown once more
-export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_5_direct_games';
+export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_5_1_direct_games';
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -89,11 +89,11 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <div className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-2.5 py-0.5 text-xs font-mono font-medium text-orange-400">
-                <span>v1.5</span>
+                <span>v1.5.1</span>
               </div>
             </div>
             <h2 id="whats-new-title" className="text-xl sm:text-2xl font-extrabold tracking-tight text-white font-mono flex items-center gap-2">
-              <span>What's new in v1.5</span>
+              <span>What's new in v1.5.1</span>
             </h2>
           </div>
 
@@ -113,6 +113,28 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
           <div className="space-y-2.5">
             <div className="text-xs font-mono font-semibold uppercase tracking-wider text-orange-400">
               Update Highlights
+            </div>
+
+            {/* Highlight: Direct Games catalogue refresh */}
+            <div className="rounded-xl border border-orange-500/40 bg-neutral-950/80 p-3.5 transition-colors hover:border-orange-500/60 shadow-sm shadow-orange-500/5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-500/40 bg-orange-500/15 text-orange-400">
+                  <Gamepad2 className="h-4.5 w-4.5" />
+                </div>
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-white">Direct Games Catalogue</h3>
+                    <span className="rounded bg-orange-500/20 border border-orange-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-orange-300">
+                      New
+                    </span>
+                  </div>
+                  <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
+                    <li>Eighteen titles now play in-app, with seventeen fresh additions and n-gon kept from the old lineup.</li>
+                    <li>A search bar and Filter menu sit in the page header — narrow by category (Arcade, Driving, Shooter, Sports, Puzzle, Idle, Sandbox) or sort A–Z / Z–A.</li>
+                    <li>A short credit line at the bottom links straight to the viberverse game repo.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             {/* Highlight: Direct Games */}
@@ -227,8 +249,8 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 flex items-start gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-orange-400 mt-1.5 shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-neutral-200">Version labels now read v1.5</div>
-                  <div className="text-[11px] text-neutral-400 leading-tight">Every remaining v1.4 tag was updated to v1.5 — hero version pill, changelog buttons, and the sidebar shortcut.</div>
+                  <div className="text-xs font-semibold text-neutral-200">Version labels now read v1.5.1</div>
+                  <div className="text-[11px] text-neutral-400 leading-tight">Every remaining v1.4 tag was updated to v1.5.1 — hero version pill, changelog buttons, and the sidebar shortcut.</div>
                 </div>
               </div>
 
