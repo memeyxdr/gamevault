@@ -29,7 +29,7 @@ const ERROR_REPORT_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSel_qnMs80ZZIFoIgV-VqPEvOd6ZDZjtbr-32cb9KHXrVuCqw/viewform?usp=dialog';
 export const GAME_SUGGESTION_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSdhulN_Qrg7223ug-iI4J3KmN5nJSepxTMDyFNSov4IE4xH8A/viewform?usp=dialog';
-const APP_VERSION = 'v1.5.1';
+const APP_VERSION = 'v1.6';
 
 interface SettingsPageProps {
   onBackToHome?: () => void;

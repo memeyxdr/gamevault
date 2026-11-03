@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Lock, KeyRound, ArrowRight, ShieldAlert, Eye, EyeOff, Clock, AlertTriangle, Check } from 'lucide-react';
+import { Lock, KeyRound, ArrowRight, ShieldAlert, Eye, EyeOff, Clock, AlertTriangle, Check, Github } from 'lucide-react';
 
 interface PasscodeGateProps {
   onUnlock: () => void;
@@ -182,7 +182,7 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
               {isLockedOut ? (
                 <AlertTriangle className="h-3 w-3 text-red-400" />
               ) : (
-                <KeyRound className="h-3 w-3 text-amber-400" />
+                <KeyRound className="h-3 w-3 text-orange-400" />
               )}
               <span>{isLockedOut ? 'SECURITY LOCKOUT' : 'RESTRICTED ACCESS'}</span>
             </div>
@@ -236,7 +236,7 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
                     ? 'border-red-900 bg-red-950/30 text-red-300 cursor-not-allowed'
                     : error
                     ? 'border-red-500 bg-[#0d0e11] focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-neutral-800 bg-[#0d0e11] focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                    : 'border-neutral-800 bg-[#0d0e11] focus:border-orange-500 focus:ring-1 focus:ring-orange-500'
                 }`}
               />
             </div>
@@ -245,7 +245,7 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
             {error && (
               <div
                 className={`flex items-center gap-1.5 text-xs pt-1 justify-center font-medium text-center ${
-                  isLockedOut ? 'text-red-400 font-semibold' : 'text-amber-400'
+                  isLockedOut ? 'text-red-400 font-semibold' : 'text-orange-400'
                 }`}
               >
                 <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
@@ -261,7 +261,7 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
             className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold shadow-lg transition-all ${
               isLockedOut
                 ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed shadow-none'
-                : 'bg-[#ff9800] hover:bg-[#fb8c00] text-neutral-950 shadow-orange-500/20 active:scale-[0.98]'
+                : 'bg-orange-500 hover:bg-orange-400 text-neutral-950 shadow-orange-500/20 active:scale-[0.98]'
             }`}
           >
             {isLockedOut ? (
@@ -277,6 +277,21 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ onUnlock }) => {
             )}
           </button>
         </form>
+
+        {/* Get code footer */}
+        <div className="mt-6 flex items-center justify-center gap-2 border-t border-neutral-800/70 pt-4">
+          <span className="text-[10px] sm:text-[11px] text-neutral-500 font-mono">Get code from GitHub</span>
+          <a
+            href="https://github.com/memeyxdr/gamevault"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Get code from GitHub"
+            title="Get code from GitHub"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-neutral-800 bg-[#16181b] text-neutral-400 hover:text-orange-400 hover:border-orange-500/50 transition-colors"
+          >
+            <Github className="h-3.5 w-3.5" />
+          </a>
+        </div>
       </div>
 
       {/* Brief Bottom Confirmation Toast */}

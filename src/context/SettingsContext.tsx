@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { GameVaultSettings, DEFAULT_SETTINGS, ACCENT_PRESETS, ThemeMode } from '../types';
 
 export const SETTINGS_STORAGE_KEY = 'gamevault_settings_v14';
+// One-time marker: v1.6 turned rail labels on by default for existing installs too
+export const RAIL_LABELS_ON_BY_DEFAULT_KEY = 'gamevault_rail_labels_default_v16';
+// One-time marker: v1.6 made Phantom Purple the default accent
+export const PURPLE_ACCENT_DEFAULT_KEY = 'gamevault_purple_accent_default_v16';
 
 interface SettingsContextValue {
   settings: GameVaultSettings;
@@ -53,10 +57,30 @@ export const SettingsProvider: React.FC<{
       const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        return {
+        const restored: GameVaultSettings = {
           ...DEFAULT_SETTINGS,
           ...parsed,
         };
+        // Saved settings predate the new default, so flip a stored "off" once
+        try {
+          if (!localStorage.getItem(RAIL_LABELS_ON_BY_DEFAULT_KEY)) {
+            restored.showRailLabels = true;
+            localStorage.setItem(RAIL_LABELS_ON_BY_DEFAULT_KEY, 'true');
+          }
+        } catch {
+          // storage unavailable
+        }
+        // Accent default moved to Phantom Purple; apply it once to existing installs
+        try {
+          if (!localStorage.getItem(PURPLE_ACCENT_DEFAULT_KEY)) {
+            restored.accentPreset = 'purple';
+            restored.customAccentColor = '#a855f7';
+            localStorage.setItem(PURPLE_ACCENT_DEFAULT_KEY, 'true');
+          }
+        } catch {
+          // storage unavailable
+        }
+        return restored;
       }
       // Migrate display mode if existing
       const legacyDisplayMode = localStorage.getItem('gamevault_display_mode');

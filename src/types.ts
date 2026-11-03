@@ -67,14 +67,14 @@ export const ACCENT_PRESETS: { id: AccentPreset; name: string; hex: string }[] =
 
 export const DEFAULT_SETTINGS: GameVaultSettings = {
   theme: 'dark',
-  accentPreset: 'orange',
-  customAccentColor: '#f97316',
+  accentPreset: 'purple',
+  customAccentColor: '#a855f7',
   performanceMode: false,
   defaultView: 'grid',
   openInNewTab: true,
   reduceMotion: false,
   compactRail: false,
-  showRailLabels: false,
+  showRailLabels: true,
 };
 
 export interface ChatMessage {
