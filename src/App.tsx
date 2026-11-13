@@ -5,7 +5,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Check } from 'lucide-react';
-import { Category, GameSiteLink, ViewMode } from './types';
+import { Category, GameSiteLink, NavPosition, ViewMode } from './types';
 import { INITIAL_CATEGORIES, INITIAL_SITE_LINKS } from './data/initialCategories';
 import { Navbar } from './components/Navbar';
 import { NavRail } from './components/NavRail';
@@ -19,9 +19,17 @@ import { WhatsNewModal, WHATS_NEW_STORAGE_KEY } from './components/WhatsNewModal
 import { QuickReturnFeedbackModal } from './components/QuickReturnFeedbackModal';
 import { DiceIcon } from './components/DiceIcon';
 import { SettingsPage } from './components/SettingsPage';
-import { BrowserUnavailableNotice } from './components/BrowserUnavailableNotice';
-import { DirectGamesPage } from './components/DirectGamesPage';
+import {
+  DirectGamesPage,
+  DIRECT_FAVORITES_STORAGE_KEY,
+  DIRECT_GAMES,
+  DirectGame,
+  readDirectFavorites,
+} from './components/DirectGamesPage';
+import { StarredDirectGames } from './components/StarredDirectGames';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
+import { CloakController } from './components/CloakController';
+import { useIsWideViewport } from './hooks/useMediaQuery';
 
 const STORAGE_KEYS = {
   CATEGORIES: 'gamevault_categories_v14',
@@ -31,6 +39,15 @@ const STORAGE_KEYS = {
 
 function VaultApp() {
   const { settings } = useSettings();
+
+  // Below the lg breakpoint only the left rail and the top bar can stay on
+  // screen. Any other docked edge falls back to the left drawer there.
+  const isWideViewport = useIsWideViewport();
+  const navPosition: NavPosition = isWideViewport
+    ? settings.navPosition
+    : settings.navPosition === 'top'
+      ? 'top'
+      : 'left';
   // Passcode gate state: strictly ephemeral (resets on refresh)
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockToast, setShowUnlockToast] = useState(false);
@@ -57,6 +74,21 @@ function VaultApp() {
       return [];
     }
   });
+
+  // Games starred in Direct Games live in the same device storage the library
+  // uses, lifted here so Starred can show them next to the starred sites.
+  const [directFavoriteIds, setDirectFavoriteIds] = useState<string[]>(readDirectFavorites);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DIRECT_FAVORITES_STORAGE_KEY, JSON.stringify(directFavoriteIds));
+    } catch {
+      // storage unavailable - favorites stay in memory for this session
+    }
+  }, [directFavoriteIds]);
+
+  // A game picked from Starred opens straight into the Direct Games player
+  const [launchDirectGameId, setLaunchDirectGameId] = useState<string | null>(null);
 
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
@@ -128,7 +160,6 @@ function VaultApp() {
 
   // Navigation & View States - Default to Home page
   const [currentView, setCurrentView] = useState<ViewMode>('home');
-  const [previousView, setPreviousView] = useState<ViewMode>('home');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [sidebarSearchQuery, setSidebarSearchQuery] = useState('');
   const [directorySearchQuery, setDirectorySearchQuery] = useState('');
@@ -260,6 +291,18 @@ function VaultApp() {
     return sites.filter((s) => s.isFavorite).length;
   }, [sites]);
 
+  // Starred games keep the order they were starred in
+  const starredDirectGames = useMemo(
+    () =>
+      directFavoriteIds
+        .map((id) => DIRECT_GAMES.find((game) => game.id === id))
+        .filter((game): game is DirectGame => Boolean(game)),
+    [directFavoriteIds]
+  );
+
+  // Starred is one list, so the nav badge counts sites and games together
+  const starredCount = favoriteSitesCount + directFavoriteIds.length;
+
   const bestGamesCount = useMemo(() => {
     return sites.filter((s) => s.isBestGame).length;
   }, [sites]);
@@ -286,21 +329,10 @@ function VaultApp() {
   };
 
   const handleNavigate = (view: ViewMode) => {
-    if (currentView !== 'browser' && view === 'browser') {
-      setPreviousView(currentView);
-    }
     setCurrentView(view);
     if (view !== 'category-detail') {
       setSelectedCategoryId(null);
     }
-  };
-
-  // The in-site browser is currently disabled, so every request to open it
-  // lands on the "temporarily unavailable" notice in the main view space.
-  const handleOpenInSiteBrowser = (_url: string) => {
-    setPreviousView(currentView === 'browser' ? previousView : currentView);
-    setQuickReturnModal({ isOpen: false });
-    setCurrentView('browser');
   };
 
   const handleToggleFavoriteSite = (siteId: string) => {
@@ -313,6 +345,17 @@ function VaultApp() {
       }
       return next;
     });
+  };
+
+  const handleToggleDirectFavorite = (gameId: string) => {
+    setDirectFavoriteIds((prev) =>
+      prev.includes(gameId) ? prev.filter((id) => id !== gameId) : [gameId, ...prev]
+    );
+  };
+
+  const handlePlayDirectGame = (game: DirectGame) => {
+    setLaunchDirectGameId(game.id);
+    setCurrentView('direct-games');
   };
 
   const handleDeleteSite = (siteId: string) => {
@@ -446,6 +489,22 @@ function VaultApp() {
     }, 120);
   };
 
+  // One rail component, rendered into whichever edge is docked.
+  const renderRail = (position: NavPosition) => (
+    <NavRail
+      position={position}
+      currentView={currentView}
+      onNavigate={handleNavigate}
+      totalSites={sites.length}
+      bestGamesCount={bestGamesCount}
+      bestWebsitesCount={bestWebsitesCount}
+      favoriteSitesCount={starredCount}
+      isOpenOnMobile={mobileMenuOpen}
+      onCloseMobile={() => setMobileMenuOpen(false)}
+      onSearchClick={handleRailSearchClick}
+    />
+  );
+
   // Gate check: If locked, render the passcode gate screen
   if (!isUnlocked) {
     return <PasscodeGate onUnlock={handleUnlock} />;
@@ -455,29 +514,21 @@ function VaultApp() {
     <div className="h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans overflow-hidden">
       {/* Top Bar (Kept clean without Best Websites) */}
       <Navbar
-        currentView={currentView}
-        onNavigate={handleNavigate}
         mobileMenuOpen={mobileMenuOpen}
         onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+        showMobileMenuButton={navPosition !== 'top'}
         totalSites={sites.length}
         onLockVault={handleLock}
         onOpenWhatsNew={handleOpenWhatsNew}
         onLaunchRandomGame={handleLaunchRandomGame}
       />
 
+      {/* Docked Navigation Bar — top edge */}
+      {navPosition === 'top' && renderRail('top')}
+
       <div className="flex flex-1 overflow-hidden w-full">
-        {/* Left Icon Rail Navigation (v1.5 Redesign) */}
-        <NavRail
-          currentView={currentView}
-          onNavigate={handleNavigate}
-          totalSites={sites.length}
-          bestGamesCount={bestGamesCount}
-          bestWebsitesCount={bestWebsitesCount}
-          favoriteSitesCount={favoriteSitesCount}
-          isOpenOnMobile={mobileMenuOpen}
-          onCloseMobile={() => setMobileMenuOpen(false)}
-          onSearchClick={handleRailSearchClick}
-        />
+        {/* Docked Navigation Rail — left edge (default) */}
+        {navPosition === 'left' && renderRail('left')}
 
         {/* Main Content Area / Expansive Main View Space */}
         <main
@@ -490,6 +541,7 @@ function VaultApp() {
           <div className={isDirectGamePlaying ? 'h-full w-full' : 'w-full max-w-7xl mx-auto'}>
           {currentView === 'home' && (
             <HomePage
+              starredCount={starredCount}
               onNavigate={handleNavigate}
               onSelectCategory={handleSelectCategory}
               categories={categories}
@@ -508,7 +560,6 @@ function VaultApp() {
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
               onSelectCategory={handleSelectCategory}
-              onOpenInSiteBrowser={handleOpenInSiteBrowser}
               searchQuery={directorySearchQuery}
               onSearchChange={setDirectorySearchQuery}
             />
@@ -524,7 +575,6 @@ function VaultApp() {
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
               onSelectCategory={handleSelectCategory}
-              onOpenInSiteBrowser={handleOpenInSiteBrowser}
               searchQuery={directorySearchQuery}
               onSearchChange={setDirectorySearchQuery}
             />
@@ -540,7 +590,6 @@ function VaultApp() {
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
               onSelectCategory={handleSelectCategory}
-              onOpenInSiteBrowser={handleOpenInSiteBrowser}
               searchQuery={directorySearchQuery}
               onSearchChange={setDirectorySearchQuery}
             />
@@ -565,30 +614,39 @@ function VaultApp() {
               }}
               onToggleFavoriteSite={handleToggleFavoriteSite}
               onDeleteSite={handleDeleteSite}
-              onOpenInSiteBrowser={handleOpenInSiteBrowser}
             />
           )}
 
           {currentView === 'favorites' && (
-            <SitesDirectory
-              sites={sites}
-              categories={categories}
-              onlyFavorites={true}
-              onlyBestGames={false}
-              onlyBestWebsites={false}
-              onToggleFavoriteSite={handleToggleFavoriteSite}
-              onDeleteSite={handleDeleteSite}
-              onSelectCategory={handleSelectCategory}
-              onOpenInSiteBrowser={handleOpenInSiteBrowser}
-              searchQuery={directorySearchQuery}
-              onSearchChange={setDirectorySearchQuery}
-            />
+            <div className="space-y-6">
+              <StarredDirectGames
+                games={starredDirectGames}
+                onPlay={handlePlayDirectGame}
+                onToggleFavorite={handleToggleDirectFavorite}
+              />
+              <SitesDirectory
+                sites={sites}
+                categories={categories}
+                onlyFavorites={true}
+                onlyBestGames={false}
+                onlyBestWebsites={false}
+                onToggleFavoriteSite={handleToggleFavoriteSite}
+                onDeleteSite={handleDeleteSite}
+                onSelectCategory={handleSelectCategory}
+                searchQuery={directorySearchQuery}
+                onSearchChange={setDirectorySearchQuery}
+              />
+            </div>
           )}
 
           {currentView === 'direct-games' && (
             <DirectGamesPage
               onBrowseSites={() => handleNavigate('all-sites')}
               onPlayingChange={setIsDirectGamePlaying}
+              favorites={directFavoriteIds}
+              onToggleFavorite={handleToggleDirectFavorite}
+              launchGameId={launchDirectGameId}
+              onLaunched={() => setLaunchDirectGameId(null)}
             />
           )}
 
@@ -601,16 +659,15 @@ function VaultApp() {
             />
           )}
 
-          {currentView === 'browser' && (
-            <BrowserUnavailableNotice
-              onBackToSites={() =>
-                handleNavigate(previousView === 'browser' ? 'all-sites' : previousView)
-              }
-            />
-          )}
           </div>
         </main>
+
+        {/* Docked Navigation Rail — right edge */}
+        {navPosition === 'right' && renderRail('right')}
       </div>
+
+      {/* Docked Navigation Bar — bottom edge */}
+      {navPosition === 'bottom' && renderRail('bottom')}
 
       {/* Brief Bottom Confirmation Toast */}
       {showUnlockToast && (
@@ -653,7 +710,6 @@ function VaultApp() {
         siteName={quickReturnModal.siteName}
         openedUrl={quickReturnModal.openedUrl}
         onClose={() => setQuickReturnModal({ isOpen: false })}
-        onOpenInSiteBrowser={handleOpenInSiteBrowser}
       />
     </div>
   );
@@ -662,6 +718,7 @@ function VaultApp() {
 export default function App() {
   return (
     <SettingsProvider>
+      <CloakController />
       <VaultApp />
     </SettingsProvider>
   );

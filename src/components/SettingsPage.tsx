@@ -19,17 +19,34 @@ import {
   Sparkles,
   Lightbulb,
   Accessibility,
+  PanelLeft,
+  PanelRight,
+  PanelTop,
+  PanelBottom,
   HardDrive,
   Copy,
+  EyeOff,
 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
-import { ACCENT_PRESETS, AccentPreset, ThemeMode, DisplayDensity } from '../types';
+import { useIsWideViewport } from '../hooks/useMediaQuery';
+import { ACCENT_PRESETS, AccentPreset, ThemeMode, DisplayDensity, NavPosition, NAV_POSITIONS } from '../types';
+import { DEFAULT_CLOAK_TITLE } from '../utils/cloak';
 
 const ERROR_REPORT_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSel_qnMs80ZZIFoIgV-VqPEvOd6ZDZjtbr-32cb9KHXrVuCqw/viewform?usp=dialog';
 export const GAME_SUGGESTION_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSdhulN_Qrg7223ug-iI4J3KmN5nJSepxTMDyFNSov4IE4xH8A/viewform?usp=dialog';
-const APP_VERSION = 'v1.6';
+const APP_VERSION = 'v1.7';
+
+const NAV_POSITION_ICONS: Record<NavPosition, React.ComponentType<{ className?: string }>> = {
+  left: PanelLeft,
+  right: PanelRight,
+  top: PanelTop,
+  bottom: PanelBottom,
+};
+
+// One-click tab names that look like ordinary school/work pages
+const CLOAK_TITLE_PRESETS = ['Google Classroom', 'Google Docs', 'Google Sheets', 'Khan Academy', 'New Tab'];
 
 interface SettingsPageProps {
   onBackToHome?: () => void;
@@ -53,6 +70,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     accentRgb,
     accentContrast,
   } = useSettings();
+
+  // The dock picker only works where the navigation bar can stay on screen.
+  const isWideViewport = useIsWideViewport();
+
+  // Below the lg breakpoint only the left rail and the top bar can be docked.
+  // Any other saved edge falls back to the left drawer, so those options are
+  // not offered there.
+  const isNavOptionAvailable = (position: NavPosition) =>
+    isWideViewport || position === 'left' || position === 'top';
+  const activeNavPosition: NavPosition =
+    isWideViewport || settings.navPosition === 'top' ? settings.navPosition : 'left';
 
   // Modals for confirmations
   const [showResetSettingsModal, setShowResetSettingsModal] = useState(false);
@@ -174,9 +202,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       `Performance Mode: ${settings.performanceMode ? 'on' : 'off'}`,
       `Reduce Motion: ${settings.reduceMotion ? 'on' : 'off'}`,              `Compact Rail: ${settings.compactRail ? 'on' : 'off'}`,
               `Rail Labels: ${settings.showRailLabels ? 'on' : 'off'}`,
+              `Navigation Bar: ${settings.navPosition}`,
 
       `Default Layout: ${settings.defaultView === 'grid' ? 'blocks (grid)' : 'compact (list)'}`,
       `Links Open In: ${settings.openInNewTab ? 'new tab' : 'same tab'}`,
+      `Tab Cloak: ${settings.cloakEnabled ? `on (${settings.cloakTitle.trim() || DEFAULT_CLOAK_TITLE})` : 'off'}`,
       '',
       `Sites: ${siteCount} | Categories: ${categoryCount} | Starred: ${favoriteCount}`,
       `Local storage: ${formattedStorage} across ${storageStats.keys} keys`,
@@ -566,6 +596,82 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         </div>
       </section>
 
+      {/* Navigation Section */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <PanelLeft className="h-4 w-4" style={{ color: currentAccentHex }} />
+          <h2 className="text-sm sm:text-base font-semibold text-white font-mono uppercase tracking-wider">
+            Navigation
+          </h2>
+        </div>
+
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 sm:p-6 space-y-4 shadow-sm">
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs sm:text-sm font-semibold text-neutral-200 block">
+                Navigation Bar Position
+              </label>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Dock the navigation bar on any edge of the window. Small screens can use the left
+                rail or the top bar; right and bottom need a wider window.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {NAV_POSITIONS.map((option) => {
+                const Icon = NAV_POSITION_ICONS[option.id];
+                const isAvailable = isNavOptionAvailable(option.id);
+                const isSelected = activeNavPosition === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    disabled={!isAvailable}
+                    aria-pressed={isSelected}
+                    onClick={() => updateSettings({ navPosition: option.id })}
+                    className={`flex flex-col items-start gap-2 p-3.5 rounded-xl border text-left transition-all ${
+                      isSelected
+                        ? 'border-white/60 bg-neutral-900 shadow-md ring-1 ring-white/20'
+                        : 'border-neutral-800 bg-neutral-950/40 hover:border-neutral-700'
+                    } ${isAvailable ? 'cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <div
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-300 shrink-0"
+                        style={isSelected ? { color: currentAccentHex } : {}}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      {isSelected && (
+                        <Check className="h-4 w-4 shrink-0" style={{ color: currentAccentHex }} />
+                      )}
+                    </div>
+                    <div>
+                      <span className="block text-xs sm:text-sm font-semibold text-white">
+                        {option.label}
+                      </span>
+                      <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
+                        {option.description}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {!isWideViewport && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-neutral-800 bg-neutral-950/60 p-3">
+                <Monitor className="h-4 w-4 shrink-0 mt-0.5" style={{ color: currentAccentHex }} />
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  Small screens offer Left and Top only, since those are the edges where the bar
+                  can stay on screen. Widen the window past 1024px to unlock Right and Bottom.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* 4. Accessibility & Motion Section */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
@@ -656,7 +762,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 Show Labels Under Rail Icons
               </span>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Prints a tiny name under every icon in the left rail — Home, Categories, Direct, All Sites, Best Games, Websites, Starred, Browser, Search and Settings — so you never have to hover to work out what an icon does.
+                Prints a tiny name under every icon in the left rail — Home, Categories, Direct, All Sites, Best Games, Websites, Starred, Search and Settings — so you never have to hover to work out what an icon does.
               </p>
             </div>
 
@@ -797,7 +903,141 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         </div>
       </section>
 
-      {/* 6. Storage & Diagnostics Section */}
+      {/* 6. Tab Cloaking Section */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <EyeOff className="h-4 w-4" style={{ color: currentAccentHex }} />
+          <h2 className="text-sm sm:text-base font-semibold text-white font-mono uppercase tracking-wider">
+            Tab Cloaking
+          </h2>
+        </div>
+
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 sm:p-6 space-y-6 shadow-sm">
+          {/* Enable toggle */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1 max-w-xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs sm:text-sm font-semibold text-neutral-200">
+                  Disguise the Browser Tab
+                </span>
+                <span className="rounded bg-neutral-800 px-1.5 py-0.2 text-[10px] font-mono text-neutral-400">
+                  tab name only
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Replaces the tab name with your choice. The address bar, URL, favicon, browser
+                history and every saved link stay exactly as they are — only the tab label changes.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.cloakEnabled}
+              aria-label="Tab Cloaking"
+              onClick={() => updateSettings({ cloakEnabled: !settings.cloakEnabled })}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                settings.cloakEnabled ? 'bg-orange-500' : 'bg-neutral-800'
+              }`}
+              style={settings.cloakEnabled ? { backgroundColor: currentAccentHex } : {}}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  settings.cloakEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="h-px bg-neutral-800/80" />
+
+          {/* Tab name */}
+          <div className="space-y-3">
+            <div>
+              <label
+                htmlFor="cloak-tab-title"
+                className="text-xs sm:text-sm font-semibold text-neutral-200 block"
+              >
+                Tab Name
+              </label>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Printed on the tab. Leave it empty to fall back to “{DEFAULT_CLOAK_TITLE}”.
+              </p>
+            </div>
+
+            <input
+              id="cloak-tab-title"
+              type="text"
+              value={settings.cloakTitle}
+              maxLength={80}
+              placeholder={DEFAULT_CLOAK_TITLE}
+              onChange={(e) => updateSettings({ cloakTitle: e.target.value })}
+              className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-950/60 px-3.5 py-2.5 text-sm font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-white/20"
+            />
+
+            <div className="flex flex-wrap gap-2">
+              {CLOAK_TITLE_PRESETS.map((preset) => {
+                const isActive =
+                  settings.cloakTitle.trim().toLowerCase() === preset.toLowerCase();
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => updateSettings({ cloakTitle: preset, cloakEnabled: true })}
+                    className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-neutral-900 text-white'
+                        : 'border-neutral-800 bg-neutral-950/40 text-neutral-300 hover:border-neutral-700 hover:text-white'
+                    }`}
+                    style={isActive ? { borderColor: currentAccentHex } : undefined}
+                  >
+                    {preset}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="h-px bg-neutral-800/80" />
+
+          {/* Live tab preview */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                Preview
+              </span>
+              <span
+                className={`rounded-full border px-2 py-0.2 text-[10px] font-mono ${
+                  settings.cloakEnabled
+                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+                    : 'border-neutral-800 bg-neutral-950 text-neutral-500'
+                }`}
+              >
+                {settings.cloakEnabled ? 'Cloak active' : 'Cloak off'}
+              </span>
+            </div>
+
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3">
+              <div className="w-full max-w-sm">
+                <div className="flex items-center gap-2 rounded-t-lg border border-b-0 border-neutral-800 bg-neutral-900 px-3 py-2">
+                  <span className="h-3.5 w-3.5 shrink-0 rounded-[3px] border border-neutral-700 bg-neutral-800" />
+                  <span className="truncate text-xs text-neutral-200">
+                    {settings.cloakTitle.trim() || DEFAULT_CLOAK_TITLE}
+                  </span>
+                </div>
+                <div className="h-6 rounded-b-lg border border-neutral-800 bg-neutral-900/40" />
+              </div>
+              <p className="mt-2.5 text-[11px] text-neutral-500">
+                The tab reads like a school page, while the address bar still shows the GameVault
+                URL.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Storage & Diagnostics Section */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <HardDrive className="h-4 w-4" style={{ color: currentAccentHex }} />
@@ -839,10 +1079,22 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               { label: 'Compact Rail', value: settings.compactRail ? 'On' : 'Off' },
               { label: 'Rail Labels', value: settings.showRailLabels ? 'On' : 'Off' },
               {
+                label: 'Navigation Bar',
+                value:
+                  NAV_POSITIONS.find((option) => option.id === settings.navPosition)?.label ??
+                  'Left',
+              },
+              {
                 label: 'Default Layout',
                 value: settings.defaultView === 'grid' ? 'Blocks (Grid)' : 'Compact (List)',
               },
               { label: 'Links Open In', value: settings.openInNewTab ? 'New tab' : 'Same tab' },
+              {
+                label: 'Tab Cloak',
+                value: settings.cloakEnabled
+                  ? `On — ${settings.cloakTitle.trim() || DEFAULT_CLOAK_TITLE}`
+                  : 'Off',
+              },
             ].map((row) => (
               <div
                 key={row.label}
@@ -873,7 +1125,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         </div>
       </section>
 
-      {/* 7. Privacy and Local Data Section */}
+      {/* 8. Privacy and Local Data Section */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <Trash2 className="h-4 w-4 text-red-400" />

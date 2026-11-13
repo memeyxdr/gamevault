@@ -36,13 +36,24 @@ export type ViewMode =
   | 'favorites'
   | 'category-detail'
   | 'ai-chat'
-  | 'settings'
-  | 'browser';
+  | 'settings';
+
+/** Edge the persistent navigation bar can be docked to on wide screens. */
+export type NavPosition = 'left' | 'right' | 'top' | 'bottom';
+
+export const NAV_POSITIONS: { id: NavPosition; label: string; description: string }[] = [
+  { id: 'left', label: 'Left', description: 'Vertical rail on the left edge' },
+  { id: 'right', label: 'Right', description: 'Vertical rail on the right edge' },
+  { id: 'top', label: 'Top', description: 'Horizontal bar under the header' },
+  { id: 'bottom', label: 'Bottom', description: 'Horizontal bar along the bottom' },
+];
 
 export type DisplayDensity = 'grid' | 'list';
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 export type AccentPreset = 'orange' | 'emerald' | 'amber' | 'cyan' | 'purple' | 'rose' | 'custom';
+
+export const DEFAULT_CLOAK_TITLE = 'Google Classroom';
 
 export interface GameVaultSettings {
   theme: ThemeMode;
@@ -54,6 +65,9 @@ export interface GameVaultSettings {
   reduceMotion: boolean;
   compactRail: boolean;
   showRailLabels: boolean;
+  navPosition: NavPosition;
+  cloakEnabled: boolean;
+  cloakTitle: string;
 }
 
 export const ACCENT_PRESETS: { id: AccentPreset; name: string; hex: string }[] = [
@@ -75,6 +89,9 @@ export const DEFAULT_SETTINGS: GameVaultSettings = {
   reduceMotion: false,
   compactRail: false,
   showRailLabels: true,
+  navPosition: 'left',
+  cloakEnabled: false,
+  cloakTitle: DEFAULT_CLOAK_TITLE,
 };
 
 export interface ChatMessage {
@@ -94,4 +111,3 @@ export interface AIModelOption {
   isDefault?: boolean;
   requiresUnlock: boolean;
 }
-

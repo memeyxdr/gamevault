@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  X,
-  ArrowRight,
-  Compass,
-  AlertTriangle,
-  Star,
-  History,
-  Gamepad2,
-} from 'lucide-react';
+import { X, ArrowRight, EyeOff, Move, Unplug, Star } from 'lucide-react';
 
 interface WhatsNewModalProps {
   isOpen: boolean;
@@ -15,7 +7,7 @@ interface WhatsNewModalProps {
 }
 
 // Bumped when the notes change so the updated changelog is shown once more
-export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_6_direct_games_sections';
+export const WHATS_NEW_STORAGE_KEY = 'gamevault_seen_v1_7_starred_games';
 
 type ChangeKind = 'fix' | 'improvement';
 
@@ -25,102 +17,90 @@ interface ChangelogEntry {
   detail: string;
   /** Headline changes render as full banner cards at the top of the modal */
   featured?: boolean;
-  icon?: 'library' | 'favorites' | 'recent';
+  icon?: 'cloak' | 'nav' | 'removed' | 'star';
   badge?: string;
   bullets?: string[];
 }
 
 // Everything shipped in this build. Rendered grouped and sorted by kind below.
-const V1_6_CHANGES: ChangelogEntry[] = [
+const V1_7_CHANGES: ChangelogEntry[] = [
   {
     kind: 'improvement',
-    title: 'Direct Games is now a full library of 117 games',
+    title: 'Starred now holds your games too',
     detail:
-      'Direct Games is no longer a short list.',
+      'Starred lists the games you star in Direct Games alongside the sites you star in the directory, and the counter in the navigation bar counts both.',
     featured: true,
-    icon: 'library',
-    badge: '117 games',
-    bullets: [
-      '117 entries pulled from viberverse, up from a small handful.',
-      '96 titles added in one sweep, plus Geometry Dash, Retro Bowl and Subway Surfers.',
-      'Every entry launches inside GameVault, with no descriptions so the grid stays name-first.',
-    ],
-  },
-  {
-    kind: 'improvement',
-    title: 'Search in Direct Games now looks at titles first',
-    detail:
-      'Typing in the search box ranks matches on the game name alone: an exact name wins, then a name that starts with your text, then a matching word inside the name, then any substring. The category filter stacks on top of the search, and A–Z / Z–A now only breaks ties instead of deciding the order.',
-  },
-  {
-    kind: 'improvement',
-    title: 'Favorites, pinned above the whole library',
-    detail:
-      'Star any game and it rises to the top.',
-    featured: true,
-    icon: 'favorites',
+    icon: 'star',
     badge: 'New',
     bullets: [
-      'Every tile has a star button in its top-right corner.',
-      'Starred games collect in a Favorites section above everything else, newest star first.',
-      'Saved on this device, so favorites survive a restart; unstar to remove.',
+      'Star a game in Direct Games and it shows up on the Starred page under Starred Direct Games — no second bookmark to keep in sync.',
+      'Click a starred game to jump straight into it: it opens in Direct Games and starts loading.',
+      'Unstar it from either place and it disappears from both, because the Starred page and the library read the same list.',
     ],
   },
   {
     kind: 'improvement',
-    title: 'Recently played section covering the past week',
-    detail:
-      'GameVault remembers what you launched.',
+    title: 'Disguise the browser tab as a school page',
+    detail: 'GameVault can now rename its own tab from Settings → Tab Cloaking.',
     featured: true,
-    icon: 'recent',
-    badge: 'Past 7 days',
+    icon: 'cloak',
+    badge: 'New',
     bullets: [
-      'Every launch is logged and shown in a Recently played row under Favorites.',
-      'Tiles read “Played just now” or “Played 3d ago”.',
-      'Anything older than a week drops off automatically.',
+      'Pick a preset — Google Classroom, Google Docs, Google Sheets, Khan Academy or New Tab — or type any name up to 80 characters.',
+      'Only the tab label changes. The address bar, URL, browser history, favicon and every saved link stay exactly as they are.',
+      'The disguise is applied from page load, even on the lockscreen, and remembered on this device.',
     ],
   },
   {
     kind: 'improvement',
-    title: 'All games divider above the library',
+    title: 'Tab cloaking has its own Settings section',
     detail:
-      'A labeled divider reading “All games” with a live count now sits above the main grid, so you can always tell where the curated Favorites and Recently played rows end and the full library begins.',
-  },
-  {
-    kind: 'fix',
-    title: 'Lockscreen highlights follow your accent again',
-    detail:
-      'The passcode field focus border and ring, the key badge, and the error text were pinned to amber, which is not wired to the accent theme. They now use the accent-aware orange classes, so a purple accent glows purple instead of leaving an orange highlight behind.',
+      'Settings → Tab Cloaking holds the on/off switch, the tab name field, preset chips and a live preview of how the tab will read, tagged Cloak active or Cloak off. A Tab Cloak line was also added to the configuration readout and the diagnostics export.',
   },
   {
     kind: 'improvement',
-    title: 'Unlock button now matches your accent color',
+    title: 'Cloaking restores the real tab name when switched off',
     detail:
-      'The lockscreen button used a hardcoded #ff9800 fill that ignored the theme. It now uses the same accent-mapped colors as the rest of GameVault, so it repaints when you switch accents.',
+      'The original GameVault title is captured the first time cloaking applies, so flipping the switch off or clearing the name brings back “GameVault - Game Sites Directory” immediately.',
   },
   {
     kind: 'improvement',
-    title: 'Get code from GitHub link on the lockscreen',
+    title: 'Tab cloaking is name-only — custom tab icons are gone',
     detail:
-      'A small “Get code from GitHub” line now sits under the Unlock button, with a clickable GitHub icon that opens the public repository in a new tab.',
+      'Icon uploads were removed entirely: cloaking no longer touches the favicon, and no icon data is stored. Any icon left in an older save is cleaned out the next time settings load.',
   },
   {
     kind: 'improvement',
-    title: 'Phantom Purple is the new default accent',
+    title: 'Version labels now read v1.7',
     detail:
-      'GameVault now ships in Phantom Purple (#a855f7) instead of Pumpkin Orange — buttons, highlights, focus rings, and glows all start purple. Existing installs switch once; pick any accent in Settings → Appearance to change it back.',
+      'Navbar badge, hero version pill, sidebar release-notes shortcut, Settings version line and this changelog header all read v1.7.',
   },
   {
     kind: 'improvement',
-    title: 'Rail labels are on by default',
+    title: 'Navigation placement bar',
     detail:
-      'Show Labels Under Rail Icons is now enabled out of the box, so every nav icon prints its name underneath and you never have to hover to find out what it does. Existing installs pick it up once; turn it off in Settings → Navigation if you prefer the bare icons.',
+      'A new navigation placement bar has been implemented, allowing you to change left, right, top, or bottom.',
+    featured: true,
+    icon: 'nav',
+    badge: 'New',
+    bullets: [
+      'Pick the dock in Settings → Navigation: a vertical rail on the left or right, or a horizontal bar on the top or bottom.',
+      'The navigation bar moves instantly and the choice is remembered on this device.',
+      'Available on screens 1024px and wider, where the bar can stay on screen — smaller screens keep the menu behind the header button.',
+    ],
   },
   {
     kind: 'improvement',
-    title: 'Version labels now read v1.6',
-    detail:
-      'Every remaining v1.5.1 tag was bumped to v1.6 — navbar badge, hero version pill, sidebar release-notes shortcut, Settings version line, and this changelog header.',
+    title: 'In-site browser removed',
+    detail: 'The in-site browser has been removed — it might come back in the future.',
+    featured: true,
+    icon: 'removed',
+    badge: 'Removed',
+    bullets: [
+      'I could not figure out how to fix it, and a browser button that does not work is useless dead code.',
+      'The Browser quick-action in the header, the rail item and the per-site In-Site buttons are all gone.',
+      'Every site in the directory still opens normally in your own browser through the Open Link buttons.',
+    ],
   },
 ];
 
@@ -131,9 +111,9 @@ const CHANGE_GROUPS: Record<ChangeKind, { title: string; labelClass: string; dot
 
 const CHANGE_ORDER: ChangeKind[] = ['fix', 'improvement'];
 
-const HIGHLIGHT_ICONS = { library: Gamepad2, favorites: Star, recent: History } as const;
+const HIGHLIGHT_ICONS = { cloak: EyeOff, nav: Move, removed: Unplug, star: Star } as const;
 
-const FEATURED_CHANGES = V1_6_CHANGES.filter((entry) => entry.featured);
+const FEATURED_CHANGES = V1_7_CHANGES.filter((entry) => entry.featured);
 
 export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -207,11 +187,11 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <div className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-2.5 py-0.5 text-xs font-mono font-medium text-orange-400">
-                <span>v1.6</span>
+                <span>v1.7</span>
               </div>
             </div>
             <h2 id="whats-new-title" className="text-xl sm:text-2xl font-extrabold tracking-tight text-white font-mono flex items-center gap-2">
-              <span>What's new in v1.6</span>
+              <span>What's new in v1.7</span>
             </h2>
           </div>
 
@@ -227,38 +207,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
 
         {/* Scrollable Body Container */}
         <div className="overflow-y-auto p-5 sm:p-6 py-4 space-y-4 relative z-10 focus:outline-none">
-          {/* Heads Up Section */}
-          <div className="space-y-2">
-            <div className="text-xs font-mono font-semibold uppercase tracking-wider text-amber-400">
-              Heads Up
-            </div>
-
-            <div className="rounded-xl border border-amber-500/40 bg-neutral-950/80 p-3.5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/15 text-amber-400">
-                  <Compass className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-1.5 flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-white">
-                      In-Site Browser is down
-                    </h3>
-                    <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 border border-amber-500/40 px-1.5 py-0.2 text-[10px] font-mono font-bold text-amber-300">
-                      <AlertTriangle className="h-3 w-3" />
-                      Fixing
-                    </span>
-                  </div>
-                  <ul className="text-xs text-neutral-300 leading-relaxed list-disc list-inside space-y-1">
-                    <li>The built-in browser is not working anymore, and it is actively being fixed.</li>
-                    <li>Every button that used to open it now shows a short notice right in the page area — no pop-ups.</li>
-                    <li>Directory links still open normally in your own browser.</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Highlights — headline changes get the same banner treatment as Heads Up */}
+          {/* Highlights — headline changes get banner treatment */}
           {FEATURED_CHANGES.length > 0 && (
             <div className="space-y-2">
               <div className="text-xs font-mono font-semibold uppercase tracking-wider text-orange-400">
@@ -267,7 +216,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
               </div>
 
               {FEATURED_CHANGES.map((entry) => {
-                const Icon = HIGHLIGHT_ICONS[entry.icon ?? 'library'];
+                const Icon = HIGHLIGHT_ICONS[entry.icon ?? 'cloak'];
                 return (
                   <div
                     key={entry.title}
@@ -304,7 +253,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose })
 
           {/* Changelog — grouped and sorted by kind */}
           {CHANGE_ORDER.map((kind) => {
-            const items = V1_6_CHANGES.filter((entry) => entry.kind === kind && !entry.featured);
+            const items = V1_7_CHANGES.filter((entry) => entry.kind === kind && !entry.featured);
             if (items.length === 0) return null;
             const group = CHANGE_GROUPS[kind];
 

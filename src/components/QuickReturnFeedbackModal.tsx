@@ -1,12 +1,11 @@
 import React from 'react';
-import { AlertCircle, ExternalLink, X, MessageSquareWarning, Compass } from 'lucide-react';
+import { AlertCircle, ExternalLink, X, MessageSquareWarning } from 'lucide-react';
 
 interface QuickReturnFeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
   siteName?: string;
   openedUrl?: string;
-  onOpenInSiteBrowser: (url: string) => void;
 }
 
 export const GAMEVAULT_ERROR_REPORT_URL =
@@ -17,7 +16,6 @@ export const QuickReturnFeedbackModal: React.FC<QuickReturnFeedbackModalProps> =
   onClose,
   siteName,
   openedUrl,
-  onOpenInSiteBrowser,
 }) => {
   if (!isOpen) return null;
 
@@ -95,16 +93,6 @@ export const QuickReturnFeedbackModal: React.FC<QuickReturnFeedbackModalProps> =
           >
             I'm all good, dismiss
           </button>
-          {openedUrl && (
-            <button
-              type="button"
-              onClick={() => onOpenInSiteBrowser(openedUrl)}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-orange-500/40 bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 text-xs font-bold transition-all"
-            >
-              <Compass className="h-3.5 w-3.5" />
-              <span>Open in In-Site Browser</span>
-            </button>
-          )}
           <a
             href={GAMEVAULT_ERROR_REPORT_URL}
             target="_blank"

@@ -21,9 +21,15 @@ interface DirectGamesPageProps {
   onBrowseSites?: () => void;
   /** Lets the shell know a game is on screen so it can drop its padding and hand over the whole view space. */
   onPlayingChange?: (isPlaying: boolean) => void;
+  /** Games starred on this device - owned by the shell so Starred can list them too. */
+  favorites: string[];
+  onToggleFavorite: (id: string) => void;
+  /** A game picked from Starred that should open straight into the player. */
+  launchGameId?: string | null;
+  onLaunched?: () => void;
 }
 
-interface DirectGame {
+export interface DirectGame {
   id: string;
   name: string;
   description?: string;
@@ -56,15 +62,15 @@ const SORT_OPTIONS: { id: SortMode; label: string }[] = [
   { id: 'za', label: 'Name Z–A' },
 ];
 
-const FAVORITES_STORAGE_KEY = 'gamevault_direct_favorites_v1';
+export const DIRECT_FAVORITES_STORAGE_KEY = 'gamevault_direct_favorites_v1';
 const RECENT_STORAGE_KEY = 'gamevault_direct_recent_v1';
 const RECENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 type RecentPlays = Record<string, number>;
 
-const readFavorites = (): string[] => {
+export const readDirectFavorites = (): string[] => {
   try {
-    const parsed = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]');
+    const parsed = JSON.parse(localStorage.getItem(DIRECT_FAVORITES_STORAGE_KEY) || '[]');
     return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
   } catch {
     return [];
@@ -93,7 +99,7 @@ const timeAgo = (at: number): string => {
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
 };
-const DIRECT_GAMES: DirectGame[] = [
+export const DIRECT_GAMES: DirectGame[] = [
   {
     id: 'n-gon',
     name: 'n-gon',
@@ -817,7 +823,7 @@ const titleMatchScore = (name: string, rawQuery: string): number => {
   return -1;
 };
 // Shared tile so Favorites, Recently played and the full library render identically.
-const GameTile: React.FC<{
+export const GameTile: React.FC<{
   game: DirectGame;
   accentHex: string;
   accentRgb: string;
@@ -882,6 +888,10 @@ const GameTile: React.FC<{
 export const DirectGamesPage: React.FC<DirectGamesPageProps> = ({
   onBrowseSites,
   onPlayingChange,
+  favorites,
+  onToggleFavorite,
+  launchGameId,
+  onLaunched,
 }) => {
   const { currentAccentHex, accentRgb } = useSettings();
   const [activeGame, setActiveGame] = useState<DirectGame | null>(null);
@@ -891,7 +901,6 @@ export const DirectGamesPage: React.FC<DirectGamesPageProps> = ({
   const [category, setCategory] = useState<GameCategory | 'all'>('all');
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [sortOpen, setSortOpen] = useState<boolean>(false);
-  const [favorites, setFavorites] = useState<string[]>(readFavorites);
   const [recentPlays, setRecentPlays] = useState<RecentPlays>(readRecentPlays);
 
   // Tell the shell when a game is running, and always hand the space back on unmount
@@ -900,15 +909,7 @@ export const DirectGamesPage: React.FC<DirectGamesPageProps> = ({
     return () => onPlayingChange?.(false);
   }, [activeGame, onPlayingChange]);
 
-  // Favorites and the recent-play log live on this device only
-  useEffect(() => {
-    try {
-      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
-    } catch {
-      /* storage unavailable - favorites stay in memory for this session */
-    }
-  }, [favorites]);
-
+  // The recent-play log lives on this device only
   useEffect(() => {
     try {
       const cutoff = Date.now() - RECENT_WINDOW_MS;
@@ -921,9 +922,18 @@ export const DirectGamesPage: React.FC<DirectGamesPageProps> = ({
     }
   }, [recentPlays]);
 
-  const toggleFavorite = (id: string) => {
-    setFavorites((prev) => (prev.includes(id) ? prev.filter((fav) => fav !== id) : [id, ...prev]));
-  };
+  // A game picked on the Starred page launches as soon as the library mounts
+  useEffect(() => {
+    if (!launchGameId) return;
+    const game = DIRECT_GAMES.find((entry) => entry.id === launchGameId);
+    if (!game) return;
+    launchGame(game);
+    onLaunched?.();
+    // launchGame only touches state setters, so the id is the only trigger
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [launchGameId]);
+
+  const toggleFavorite = (id: string) => onToggleFavorite(id);
 
   const launchGame = (game: DirectGame) => {
     setIframeKey((prev) => prev + 1);

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { GameVaultSettings, DEFAULT_SETTINGS, ACCENT_PRESETS, ThemeMode } from '../types';
+import { GameVaultSettings, DEFAULT_SETTINGS, ACCENT_PRESETS, NAV_POSITIONS, ThemeMode } from '../types';
 
 export const SETTINGS_STORAGE_KEY = 'gamevault_settings_v14';
 // One-time marker: v1.6 turned rail labels on by default for existing installs too
@@ -57,10 +57,24 @@ export const SettingsProvider: React.FC<{
       const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
+        // Tab icon cloaking was removed; drop any icon an older save still holds
+        // so its image data stops taking up storage.
+        if (parsed && typeof parsed === 'object' && 'cloakIcon' in parsed) {
+          delete parsed.cloakIcon;
+          try {
+            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
+          } catch {
+            // storage unavailable
+          }
+        }
         const restored: GameVaultSettings = {
           ...DEFAULT_SETTINGS,
           ...parsed,
         };
+        // An unknown dock position from an older or hand-edited save falls back to the left rail
+        if (!NAV_POSITIONS.some((option) => option.id === restored.navPosition)) {
+          restored.navPosition = DEFAULT_SETTINGS.navPosition;
+        }
         // Saved settings predate the new default, so flip a stored "off" once
         try {
           if (!localStorage.getItem(RAIL_LABELS_ON_BY_DEFAULT_KEY)) {

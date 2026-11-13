@@ -13,7 +13,6 @@ import {
   Trophy,
   Medal,
   X,
-  Compass,
 } from 'lucide-react';
 import { Category, GameSiteLink, DisplayDensity } from '../types';
 import { CategoryIcon } from './CategoryIcon';
@@ -28,7 +27,6 @@ interface SitesDirectoryProps {
   onToggleFavoriteSite: (siteId: string) => void;
   onDeleteSite: (siteId: string) => void;
   onSelectCategory: (categoryId: string) => void;
-  onOpenInSiteBrowser: (url: string) => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
 }
@@ -42,11 +40,10 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
   onToggleFavoriteSite,
   onDeleteSite,
   onSelectCategory,
-  onOpenInSiteBrowser,
   searchQuery,
   onSearchChange,
 }) => {
-  const { settings, updateSettings, currentAccentHex } = useSettings();
+  const { settings, updateSettings, currentAccentHex, accentRgb } = useSettings();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'rank' | 'name' | 'domain' | 'date'>(
     onlyBestGames || onlyBestWebsites ? 'rank' : 'name'
@@ -119,6 +116,11 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
       return 0;
     });
 
+  // Sort default differs per page, so the "filtered" highlight only lights up when the user moves away from it
+  const sortDefault: 'rank' | 'name' = onlyBestGames || onlyBestWebsites ? 'rank' : 'name';
+  const filtersActive =
+    selectedCategoryId !== 'all' || sortBy !== sortDefault || searchQuery.trim() !== '';
+
   return (
     <div className="space-y-6">
       {/* Title & Toolbar */}
@@ -137,7 +139,7 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                 : onlyBestGames
                 ? 'Best Games Leaderboard'
                 : onlyFavorites
-                ? 'Starred Game Sites'
+                ? 'Starred Sites'
                 : 'All Sites'}
             </h1>
           </div>
@@ -147,7 +149,7 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
               : onlyBestGames
               ? 'Ranked community leaderboard of top unblocked games and interactive web portals'
               : onlyFavorites
-              ? 'Bookmarked game site links across all categories'
+              ? 'Bookmarked sites and Direct Games saved with the star button'
               : 'Complete index of external game sites and portal links organized by category'}
           </p>
         </div>
@@ -159,10 +161,17 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
               type="button"
               onClick={() => handleToggleViewSetting('grid')}
               className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                viewSetting === 'grid'
-                  ? 'bg-neutral-800 text-white shadow-sm'
-                  : 'text-neutral-400 hover:text-neutral-200'
+                viewSetting === 'grid' ? 'shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
               }`}
+              style={
+                viewSetting === 'grid'
+                  ? {
+                      backgroundColor: `rgba(${accentRgb}, 0.16)`,
+                      color: currentAccentHex,
+                      boxShadow: `0 1px 8px rgba(${accentRgb}, 0.15)`,
+                    }
+                  : undefined
+              }
             >
               <LayoutGrid className="h-3.5 w-3.5" />
               <span>Blocks</span>
@@ -171,17 +180,27 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
               type="button"
               onClick={() => handleToggleViewSetting('list')}
               className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                viewSetting === 'list'
-                  ? 'bg-neutral-800 text-white shadow-sm'
-                  : 'text-neutral-400 hover:text-neutral-200'
+                viewSetting === 'list' ? 'shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
               }`}
+              style={
+                viewSetting === 'list'
+                  ? {
+                      backgroundColor: `rgba(${accentRgb}, 0.16)`,
+                      color: currentAccentHex,
+                      boxShadow: `0 1px 8px rgba(${accentRgb}, 0.15)`,
+                    }
+                  : undefined
+              }
             >
               <List className="h-3.5 w-3.5" />
               <span>List</span>
             </button>
           </div>
 
-          <div className="hidden sm:block text-xs font-mono text-neutral-500 tabular-nums">
+          <div
+            className="hidden sm:block text-xs font-mono text-neutral-500 tabular-nums"
+            style={filtersActive ? { color: currentAccentHex } : undefined}
+          >
             {displayedSites.length} of {sites.length} sites
           </div>
         </div>
@@ -198,6 +217,7 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full rounded-md border border-neutral-800 bg-neutral-900/80 py-2 pl-9 pr-8 text-xs text-neutral-200 placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none"
+            style={searchQuery ? { borderColor: `rgba(${accentRgb}, 0.55)` } : undefined}
           />
           {searchQuery && (
             <button
@@ -218,6 +238,11 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
               onChange={(e) => setSelectedCategoryId(e.target.value)}
               aria-label="Filter by category"
               className="h-9 rounded-md border border-neutral-800 bg-neutral-900 px-3 text-xs text-neutral-200 focus:border-neutral-600 focus:outline-none"
+              style={
+                selectedCategoryId !== 'all'
+                  ? { borderColor: `rgba(${accentRgb}, 0.55)`, color: currentAccentHex }
+                  : undefined
+              }
             >
               <option value="all">All Categories ({categories.length})</option>
               {categories.map((c) => (
@@ -233,6 +258,11 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
               onChange={(e) => setSortBy(e.target.value as any)}
               aria-label="Sort sites"
               className="h-9 rounded-md border border-neutral-800 bg-neutral-900 px-3 text-xs text-neutral-200 focus:border-neutral-600 focus:outline-none"
+              style={
+                sortBy !== sortDefault
+                  ? { borderColor: `rgba(${accentRgb}, 0.55)`, color: currentAccentHex }
+                  : undefined
+              }
             >
               {(onlyBestGames || onlyBestWebsites) && (
                 <option value="rank">Sort: Leaderboard Rank</option>
@@ -264,7 +294,7 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                       ? 'border-yellow-500/40 bg-neutral-900/80 shadow-[0_0_16px_rgba(234,179,8,0.08)] hover:border-yellow-400 hover:shadow-[0_0_24px_rgba(234,179,8,0.18)]'
                       : site.isBestWebsite
                       ? 'border-amber-500/40 bg-neutral-900/80 shadow-[0_0_16px_rgba(245,158,11,0.08)] hover:border-amber-400 hover:shadow-[0_0_24px_rgba(245,158,11,0.18)]'
-                      : 'border-neutral-800/90 bg-neutral-900/50 hover:border-orange-500/50 hover:bg-neutral-900/90 hover:shadow-[0_4px_25px_rgba(0,0,0,0.8),0_0_20px_rgba(234,88,12,0.12)] light-directory-card gv-accent-hover'
+                      : 'border-neutral-800/90 bg-neutral-900/50 hover:border-orange-500/50 hover:bg-neutral-900/90 hover:shadow-[0_4px_25px_rgba(0,0,0,0.8)] light-directory-card gv-accent-hover'
                   }`}
                 >
                   <div>
@@ -327,14 +357,11 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                         <button
                           type="button"
                           onClick={() => onToggleFavoriteSite(site.id)}
-                          className="p-1.5 rounded text-neutral-400 hover:bg-neutral-800 hover:text-amber-400 transition-colors"
+                          className="p-1.5 rounded text-neutral-400 hover:bg-neutral-800 hover:text-orange-400 transition-colors"
                           title={site.isFavorite ? 'Remove star' : 'Star site'}
+                          style={site.isFavorite ? { color: currentAccentHex } : undefined}
                         >
-                          <Star
-                            className={`h-3.5 w-3.5 ${
-                              site.isFavorite ? 'fill-amber-400 text-amber-400' : ''
-                            }`}
-                          />
+                          <Star className={`h-3.5 w-3.5 ${site.isFavorite ? 'fill-current' : ''}`} />
                         </button>
                       </div>
                     </div>
@@ -434,20 +461,11 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                         href={site.url}
                         target={settings.openInNewTab ? '_blank' : '_self'}
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 font-medium text-neutral-200 hover:text-white transition-colors"
+                        className="inline-flex items-center gap-1 font-medium text-neutral-200 hover:text-orange-400 transition-colors"
                       >
                         <span>Open Link</span>
                         <ExternalLink className="h-3 w-3" />
                       </a>
-                      <button
-                        type="button"
-                        onClick={() => onOpenInSiteBrowser(site.url)}
-                        className="inline-flex items-center gap-1 font-medium text-orange-400 hover:text-orange-300 transition-colors"
-                        title="Open in GameVault browser"
-                      >
-                        <Compass className="h-3 w-3" />
-                        <span>In-Site</span>
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -589,33 +607,26 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
                     <button
                       type="button"
                       onClick={() => onToggleFavoriteSite(site.id)}
-                      className="p-1 text-neutral-400 hover:text-amber-400 transition-colors"
+                      className="p-1 text-neutral-400 hover:text-orange-400 transition-colors"
                       title="Favorite"
+                      style={site.isFavorite ? { color: currentAccentHex } : undefined}
                     >
-                      <Star
-                        className={`h-4 w-4 ${
-                          site.isFavorite ? 'fill-amber-400 text-amber-400' : ''
-                        }`}
-                      />
+                      <Star className={`h-4 w-4 ${site.isFavorite ? 'fill-current' : ''}`} />
                     </button>
                     <a
                       href={site.url}
                       target={settings.openInNewTab ? '_blank' : '_self'}
                       rel="noreferrer"
-                      className="flex items-center gap-1 rounded border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs text-neutral-200 hover:bg-neutral-700 transition-colors"
+                      className="flex items-center gap-1 rounded border px-2.5 py-1 text-xs font-medium transition-all hover:brightness-125"
+                      style={{
+                        borderColor: `rgba(${accentRgb}, 0.45)`,
+                        backgroundColor: `rgba(${accentRgb}, 0.12)`,
+                        color: currentAccentHex,
+                      }}
                     >
                       <span>Open Link</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
-                    <button
-                      type="button"
-                      onClick={() => onOpenInSiteBrowser(site.url)}
-                      className="flex items-center gap-1 rounded border border-orange-500/40 bg-orange-500/10 px-2.5 py-1 text-xs text-orange-400 hover:bg-orange-500/20 transition-colors"
-                      title="Open in GameVault browser"
-                    >
-                      <Compass className="h-3 w-3" />
-                      <span>In-Site</span>
-                    </button>
                   </div>
                 </div>
               );
@@ -625,7 +636,14 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
       ) : (
         /* Empty State */
         <div className="flex flex-col items-center justify-center rounded-lg border border-neutral-800/80 bg-neutral-900/20 py-20 px-4 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 mb-3">
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-lg border mb-3"
+            style={{
+              borderColor: `rgba(${accentRgb}, 0.45)`,
+              backgroundColor: `rgba(${accentRgb}, 0.12)`,
+              color: currentAccentHex,
+            }}
+          >
             <FolderOpen className="h-6 w-6" />
           </div>
 
@@ -649,7 +667,12 @@ export const SitesDirectory: React.FC<SitesDirectoryProps> = ({
             <button
               type="button"
               onClick={() => onSearchChange('')}
-              className="mt-4 rounded bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-neutral-700 transition-colors"
+              className="mt-4 rounded border px-3 py-1.5 text-xs font-semibold transition-all active:scale-95"
+              style={{
+                borderColor: `rgba(${accentRgb}, 0.45)`,
+                backgroundColor: `rgba(${accentRgb}, 0.12)`,
+                color: currentAccentHex,
+              }}
             >
               Clear Search
             </button>

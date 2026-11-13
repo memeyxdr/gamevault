@@ -10,7 +10,6 @@ import {
   Copy,
   Check,
   Trophy,
-  Compass,
 } from 'lucide-react';
 import { Category, GameSiteLink } from '../types';
 import { CategoryIcon } from './CategoryIcon';
@@ -22,7 +21,6 @@ interface CategoryDetailProps {
   onBack: () => void;
   onToggleFavoriteSite: (siteId: string) => void;
   onDeleteSite: (siteId: string) => void;
-  onOpenInSiteBrowser: (url: string) => void;
 }
 
 export const CategoryDetail: React.FC<CategoryDetailProps> = ({
@@ -31,7 +29,6 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
   onBack,
   onToggleFavoriteSite,
   onDeleteSite,
-  onOpenInSiteBrowser,
 }) => {
   const { settings } = useSettings();
   const [siteSearch, setSiteSearch] = useState('');
@@ -269,15 +266,6 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
                       <span>Open Link</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
-                    <button
-                      type="button"
-                      onClick={() => onOpenInSiteBrowser(site.url)}
-                      className="inline-flex items-center gap-1 text-orange-400 hover:text-orange-300 transition-colors"
-                      title="Open in GameVault browser"
-                    >
-                      <Compass className="h-3 w-3" />
-                      <span>In-Site</span>
-                    </button>
                   </div>
                 </div>
               </div>

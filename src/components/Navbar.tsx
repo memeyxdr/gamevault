@@ -1,14 +1,14 @@
-import React from 'react';
-import { Menu, X, Lock, Compass } from 'lucide-react';
-import { ViewMode } from '../types';
+import React, { useState } from 'react';
+import { Menu, X, Lock, Sparkles } from 'lucide-react';
 import { DiceIcon } from './DiceIcon';
+import { NextUpdateModal } from './NextUpdateModal';
 import { useSettings } from '../context/SettingsContext';
 
 interface NavbarProps {
-  currentView?: ViewMode;
-  onNavigate?: (view: ViewMode) => void;
   mobileMenuOpen: boolean;
   onToggleMobileMenu: () => void;
+  /** Hidden when the docked top bar replaces the slide-out drawer. */
+  showMobileMenuButton?: boolean;
   totalSites: number;
   onLockVault?: () => void;
   onOpenWhatsNew: () => void;
@@ -16,16 +16,16 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  currentView,
-  onNavigate,
   mobileMenuOpen,
   onToggleMobileMenu,
+  showMobileMenuButton = true,
   totalSites,
   onLockVault,
   onOpenWhatsNew,
   onLaunchRandomGame,
 }) => {
   const { settings, currentAccentHex, accentRgb } = useSettings();
+  const [nextUpdateOpen, setNextUpdateOpen] = useState(false);
 
   return (
     <>
@@ -33,27 +33,45 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-6 lg:px-8">
           {/* Zone 1: Wordmark & Mobile Toggle */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
-            <button
-              type="button"
-              onClick={onToggleMobileMenu}
-              className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-900 hover:text-orange-400 lg:hidden cursor-pointer shrink-0"
-              aria-label="Toggle navigation menu"
+            {showMobileMenuButton && (
+              <button
+                type="button"
+                onClick={onToggleMobileMenu}
+                className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-900 hover:text-orange-400 lg:hidden cursor-pointer shrink-0"
+                aria-label="Toggle navigation menu"
                 style={{ '--gv-accent-hover': currentAccentHex } as React.CSSProperties}
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+              >
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            )}
 
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               <button
                 type="button"
                 onClick={onOpenWhatsNew}
                 className="text-left font-semibold text-base sm:text-lg tracking-tight text-neutral-100 transition-colors hover:text-orange-200 flex items-center gap-1.5 sm:gap-2 group cursor-pointer"
-                title="Click to view What's new in v1.6"
+                title="Click to view What's new in v1.7"
               >
                 <span className="whitespace-nowrap">GameVault</span>
                 <span className="rounded-full border border-orange-500/50 bg-orange-500/15 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-medium text-orange-400 group-hover:bg-orange-500/25 group-hover:border-orange-500/70 transition-colors whitespace-nowrap">
-                  v1.6
+                  v1.7
                 </span>
+              </button>
+
+              {/* Peek at v1.8 — sits between the version pill and the Beta tag */}
+              <button
+                type="button"
+                onClick={() => setNextUpdateOpen(true)}
+                title="See what's planned for the next update"
+                className="hidden sm:inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-semibold whitespace-nowrap transition-all hover:brightness-125 cursor-pointer"
+                style={{
+                  borderColor: `rgba(${accentRgb}, 0.45)`,
+                  backgroundColor: `rgba(${accentRgb}, 0.1)`,
+                  color: currentAccentHex,
+                }}
+              >
+                <Sparkles className="h-2.5 w-2.5" />
+                <span>Next Update</span>
               </button>
 
               <span
@@ -67,30 +85,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Zone 3: Actions & Status */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 xl:gap-3 text-xs text-neutral-400 font-mono shrink-0">
-            {/* 🌐 In-Site Browser Quick Action Button */}
-            {onNavigate && (
-              <button
-                type="button"
-                onClick={() => onNavigate('browser')}
-                title="In-Site Browser - Browse websites & proxies inside GameVault"
-                aria-label="In-Site Browser"
-                className={`inline-flex items-center justify-center gap-1.5 rounded-lg border p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold transition-all active:scale-95 cursor-pointer shrink-0 ${
-                  currentView === 'browser'
-                    ? 'border-orange-500 bg-orange-500/20 text-orange-300 shadow-sm shadow-orange-500/20'
-                    : 'border-neutral-800 bg-neutral-900/90 text-neutral-300 hover:border-orange-500/50 hover:text-orange-300'
-                }`}
-                style={currentView === 'browser' ? {
-                  borderColor: currentAccentHex,
-                  backgroundColor: `rgba(${accentRgb}, 0.16)`,
-                  color: currentAccentHex,
-                  boxShadow: `0 1px 8px rgba(${accentRgb}, 0.14)`,
-                } : undefined}
-              >
-                <Compass className="h-4 w-4 shrink-0" style={{ color: currentAccentHex }} />
-                <span className="hidden sm:inline font-sans font-medium whitespace-nowrap">Browser</span>
-              </button>
-            )}
-
             {/* 🎲 Random Game / I'm Feeling Lucky Button */}
             <button
               type="button"
@@ -123,6 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </header>
 
       {/* External Gateway / AnyProxy Disclaimer Modal */}
+      <NextUpdateModal isOpen={nextUpdateOpen} onClose={() => setNextUpdateOpen(false)} />
     </>
   );
 };
